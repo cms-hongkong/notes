@@ -6,16 +6,16 @@
     <title>CMS認音大挑戰</title>
     <style>
         :root {
-            --forest-deep: #2D5A27;
-            --forest-light: #7FB069;
-            --wood: #8B5A2B;
-            --sand: #F9F1DC;
-            --grass: #D4FC79;
+            --forest-green: #1B4332;
+            --leaf-green: #74C69D;
+            --wood-brown: #604439;
+            --sand-light: #F8F4E3;
+            --text-serif: "Times New Roman", "SimSun", "PMingLiU", "serif";
         }
 
         body {
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft JhengHei', sans-serif;
-            background: linear-gradient(135deg, var(--grass) 0%, #96E6A1 100%);
+            font-family: var(--text-serif);
+            background: linear-gradient(135deg, #D8F3DC 0%, #95D5B2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,72 +23,90 @@
             margin: 0;
             padding: 10px;
             box-sizing: border-box;
-            color: #333;
+            color: var(--forest-green);
         }
 
         #game-container {
             background: rgba(255, 255, 255, 0.95);
             padding: 25px;
-            border-radius: 45px;
-            box-shadow: 0 15px 0px var(--wood), 0 25px 50px rgba(0,0,0,0.2);
+            border-radius: 40px;
+            box-shadow: 0 12px 0px var(--wood-brown), 0 20px 40px rgba(0,0,0,0.15);
             width: 100%;
-            max-width: 950px;
+            max-width: 980px;
             position: relative;
             text-align: center;
-            border: 8px solid white;
+            border: 6px solid var(--sand-light);
         }
 
-        .player-header {
-            font-size: 1.8rem;
-            color: var(--forest-deep);
-            font-weight: bold;
+        /* 個人化標題與名稱輸入欄位 */
+        .title-section {
             margin-bottom: 15px;
-            display: none; /* 開始遊戲後顯示 */
-            text-shadow: 1px 1px 0px white;
         }
 
-        .stats-row {
+        #game-title-text {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--forest-green);
+        }
+
+        .input-bar {
+            margin-bottom: 20px;
+        }
+
+        input#playerNameInput {
+            font-family: var(--text-serif);
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            border: 3px solid var(--leaf-green);
+            outline: none;
+            text-align: center;
+            width: 250px;
+            background: white;
+        }
+
+        .stats-bar {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
         }
 
         .badge {
-            background: var(--sand);
-            padding: 8px 20px;
-            border-radius: 25px;
+            background: var(--sand-light);
+            padding: 8px 18px;
+            border-radius: 20px;
             font-size: 1.2rem;
             font-weight: bold;
-            border: 3px solid var(--wood);
-            color: var(--wood);
+            border: 2px solid var(--wood-brown);
         }
 
         canvas {
             width: 100%;
             height: auto;
             background: white;
-            border-radius: 25px;
-            margin: 15px 0;
-            border: 5px solid var(--forest-light);
+            border-radius: 20px;
+            border: 4px solid var(--leaf-green);
+            margin: 10px 0;
         }
 
-        /* 3 個選項按鈕 */
+        /* 3 個答案按鈕 */
         #answer-area {
             display: flex;
             justify-content: center;
             gap: 30px;
             margin: 25px 0;
-            min-height: 160px;
+            min-height: 180px;
         }
 
         .animal-btn {
-            background: white;
-            border: 4px solid var(--wood);
-            border-radius: 35px;
+            background: #FFF;
+            border: 4px solid var(--wood-brown);
+            border-radius: 30px;
             padding: 15px;
-            width: 150px;
+            width: 160px;
             cursor: pointer;
-            box-shadow: 0 8px 0 var(--wood);
+            box-shadow: 0 8px 0 var(--wood-brown);
             transition: all 0.1s;
             display: flex;
             flex-direction: column;
@@ -97,20 +115,22 @@
 
         .animal-btn:active {
             transform: translateY(6px);
-            box-shadow: 0 2px 0 var(--wood);
+            box-shadow: 0 2px 0 var(--wood-brown);
         }
 
         .animal-img {
-            width: 90px;
-            height: 90px;
+            width: 100px;
+            height: 100px;
             object-fit: contain;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
-        .animal-name {
-            font-size: 1.5rem;
+        .letter-name {
+            /* 字體放大 50% */
+            font-size: 2rem; 
             font-weight: bold;
-            color: var(--wood);
+            color: var(--wood-brown);
+            font-family: var(--text-serif);
         }
 
         /* 覆蓋介面 */
@@ -118,40 +138,28 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.98);
-            border-radius: 38px;
+            border-radius: 34px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 100;
-            padding: 30px;
-            box-sizing: border-box;
-        }
-
-        input#playerName {
-            padding: 15px 25px;
-            font-size: 1.5rem;
-            border-radius: 50px;
-            border: 4px solid var(--forest-light);
-            outline: none;
-            text-align: center;
-            width: 300px;
-            margin-bottom: 25px;
-            color: var(--forest-deep);
+            padding: 20px;
         }
 
         .btn-forest {
-            background: var(--forest-deep);
+            font-family: var(--text-serif);
+            background: var(--forest-green);
             color: white;
-            padding: 15px 40px;
+            padding: 15px 35px;
             border-radius: 50px;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             border: none;
             cursor: pointer;
-            box-shadow: 0 6px 0 var(--wood);
+            box-shadow: 0 6px 0 var(--wood-brown);
             font-weight: bold;
-            margin: 10px;
-            width: 320px;
+            margin: 8px;
+            width: 300px;
         }
 
         /* 排行榜表格 */
@@ -159,29 +167,32 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
+            font-family: var(--text-serif);
         }
-        .rank-table th { background: var(--forest-light); color: white; padding: 12px; }
-        .rank-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+        .rank-table th { background: var(--leaf-green); padding: 10px; color: white; }
+        .rank-table td { padding: 10px; border-bottom: 1px solid #ddd; text-align: center; }
 
-        .tab-group { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
         .tab-btn {
-            padding: 5px 12px; border-radius: 10px; border: 2px solid var(--forest-deep);
-            background: white; cursor: pointer; font-weight: bold;
+            font-family: var(--text-serif);
+            padding: 6px 12px; border-radius: 10px; border: 2px solid var(--forest-green);
+            background: white; cursor: pointer; margin: 0 2px;
         }
-        .tab-btn.active { background: var(--forest-deep); color: white; }
+        .tab-btn.active { background: var(--forest-green); color: white; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="title-bar" class="player-header">遊戲者 的認音挑戰</div>
+    <div class="title-section">
+        <div id="game-title-text">CMS認音大挑戰</div>
+        <div class="input-bar" id="name-input-area">
+            <input type="text" id="playerNameInput" placeholder="請輸入你的名字（選填）" maxlength="10" oninput="updatePersonalTitle()">
+        </div>
+    </div>
     
-    <div class="stats-row">
-        <div class="badge" id="lv-tag">LV 1</div>
-        <div class="badge" id="count-tag">1 / 10</div>
+    <div class="stats-bar">
+        <div class="badge" id="lv-display">LV 1</div>
+        <div class="badge" id="count-display">1 / 10</div>
         <div class="badge">⭐ <span id="score-val">0</span></div>
     </div>
 
@@ -191,47 +202,46 @@
         </div>
 
     <div id="overlay">
-        <div id="start-screen">
-            <h1 style="color: var(--forest-deep); font-size: 3rem; margin-bottom: 10px;">CMS認音大挑戰</h1>
-            <p style="color: var(--wood); font-weight: bold;">輸入名字後，點選關卡開始！</p>
-            <input type="text" id="playerName" placeholder="請輸入你的名字" maxlength="10">
-            <div style="display: flex; flex-wrap: wrap; justify-content: center;">
-                <button class="btn-forest" onclick="handleStart(1)">Level 1 (C, D, E)</button>
-                <button class="btn-forest" onclick="handleStart(2)">Level 2 (C - G)</button>
-                <button class="btn-forest" onclick="handleStart(3)">Level 3 (C - B)</button>
-                <button class="btn-forest" onclick="handleStart(4)">Level 4 (C - D')</button>
-                <button class="btn-forest" onclick="handleStart(5)">Level 5 (C - G')</button>
+        <div id="menu-view">
+            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">CMS認音大挑戰</h1>
+            <p style="color: var(--wood-brown); font-weight: bold;">請點選等級開始遊戲：</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; max-width: 700px;">
+                <button class="btn-forest" onclick="startGame(1)">Level 1 (C, D, E)</button>
+                <button class="btn-forest" onclick="startGame(2)">Level 2 (C - G)</button>
+                <button class="btn-forest" onclick="startGame(3)">Level 3 (C - B)</button>
+                <button class="btn-forest" onclick="startGame(4)">Level 4 (C - D')</button>
+                <button class="btn-forest" onclick="startGame(5)">Level 5 (C - G')</button>
             </div>
-            <button class="btn-forest" style="background: var(--wood); width: 220px; margin-top: 20px;" onclick="viewRank()">🏆 查看排行榜</button>
+            <button class="btn-forest" style="background: var(--wood-brown); width: 220px; margin-top: 20px;" onclick="showRank()">🏆 高手排行榜</button>
         </div>
 
-        <div id="end-screen" style="display: none;">
-            <h2 id="end-title" style="color: var(--forest-deep); font-size: 3rem;">太利害啦！</h2>
-            <p id="end-msg" style="font-size: 1.8rem; margin: 15px 0;"></p>
-            <p id="time-msg" style="color: var(--wood); font-weight: bold;"></p>
-            <button class="btn-forest" onclick="resetGame()">再玩一次</button>
-            <button class="btn-forest" style="background: var(--forest-light);" onclick="goHome()">回首頁</button>
+        <div id="result-view" style="display: none;">
+            <h2 id="result-title" style="font-size: 3rem; color: var(--forest-green);">太利害啦！</h2>
+            <p id="result-text" style="font-size: 1.5rem;"></p>
+            <p id="time-text" style="color: var(--wood-brown); font-weight: bold;"></p>
+            <button class="btn-forest" onclick="restartGame()">再玩一次</button>
+            <button class="btn-forest" style="background: var(--leaf-green); color: var(--forest-green);" onclick="goHome()">回首頁</button>
         </div>
 
-        <div id="rank-screen" style="display: none; width: 100%;">
-            <h2 style="color: var(--forest-deep);">CMS認音大挑戰 - 高手排行榜</h2>
-            <div class="tab-group" id="rank-tabs">
-                <button class="tab-btn active" onclick="loadRank('all')">全部</button>
-                <button class="tab-btn" onclick="loadRank(1)">LV 1</button>
-                <button class="tab-btn" onclick="loadRank(2)">LV 2</button>
-                <button class="tab-btn" onclick="loadRank(3)">LV 3</button>
-                <button class="tab-btn" onclick="loadRank(4)">LV 4</button>
-                <button class="tab-btn" onclick="loadRank(5)">LV 5</button>
+        <div id="rank-view" style="display: none; width: 95%;">
+            <h2>CMS認音大挑戰 - 高手排行榜</h2>
+            <div style="margin-bottom: 10px;">
+                <button class="tab-btn active" onclick="updateRankUI('all')">全部</button>
+                <button class="tab-btn" onclick="updateRankUI(1)">LV 1</button>
+                <button class="tab-btn" onclick="updateRankUI(2)">LV 2</button>
+                <button class="tab-btn" onclick="updateRankUI(3)">LV 3</button>
+                <button class="tab-btn" onclick="updateRankUI(4)">LV 4</button>
+                <button class="tab-btn" onclick="updateRankUI(5)">LV 5</button>
             </div>
-            <div style="max-height: 300px; overflow-y: auto; width: 100%;">
+            <div style="max-height: 300px; overflow-y: auto; background: white; border-radius: 15px; width: 100%;">
                 <table class="rank-table">
-                    <thead><tr><th>排名</th><th>名稱</th><th>LV</th><th>分數</th><th>秒數</th><th>日期</th></tr></thead>
-                    <tbody id="rank-list"></tbody>
+                    <thead><tr><th>排名</th><th>名稱</th><th>LV</th><th>分數</th><th>耗時</th><th>日期</th></tr></thead>
+                    <tbody id="rank-body"></tbody>
                 </table>
             </div>
-            <button class="btn-forest" style="margin-top: 20px; width: 180px;" onclick="goHome()">回首頁</button>
+            <button class="btn-forest" style="margin-top: 15px; width: 180px;" onclick="goHome()">回首頁</button>
             <br>
-            <button onclick="clearRank()" style="background:none; border:none; color:#999; cursor:pointer; text-decoration:underline;">清除排行榜</button>
+            <button onclick="clearRank()" style="background:none; border:none; color:#999; cursor:pointer; text-decoration:underline; margin-top:10px;">清除排行榜</button>
         </div>
     </div>
 </div>
@@ -243,18 +253,16 @@
     let curLv = 1;
     let score = 0;
     let targetNote = "";
-    let isGameOn = false;
-    let qCount = 10;
-    let pName = "";
-    let tStart, tEnd;
+    let lastTargetNote = ""; // 防連續重複
+    let questionsLeft = 10;
+    let startTime, endTime;
 
-    // --- 修改點 4: 線距增加 10 (基底 45 -> 55) ---
-    const s = 55; 
+    // --- 修改點 4: 線距 + 20 (基數 45 -> 65) ---
+    const s = 65; 
     const baseLineY = canvas.height / 2 + 50;
-    // --- 修改點 4: 高音譜號下移 30 ---
-    const clefDown = 30;
+    const clefOffsetY = 30; // 高音譜號下移
 
-    const notesSet = {
+    const notesMap = {
         1: ["C4", "D4", "E4"],
         2: ["C4", "D4", "E4", "F4", "G4"],
         3: ["C4", "D4", "E4", "F4", "G4", "A4", "B4"],
@@ -262,19 +270,30 @@
         5: ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5", "E5", "F5", "G5"]
     };
 
-    const imgMap = {
+    const animalImgs = {
         'C': 'cat-h.PNG', 'D': 'dog-h.PNG', 'E': 'elephant-h.PNG',
         'F': 'frog-h.PNG', 'G': 'giraffe-h.PNG', 'A': 'ape-h.PNG', 'B': 'bear-h.PNG'
     };
 
-    const stepMap = {
+    const stepData = {
         "C4": -2, "D4": -1, "E4": 0, "F4": 1, "G4": 2, "A4": 3, "B4": 4,
         "C5": 5, "D5": 6, "E5": 7, "F5": 8, "G5": 9
     };
 
+    // 更新標題
+    function updatePersonalTitle() {
+        const name = document.getElementById('playerNameInput').value.trim();
+        const titleDiv = document.getElementById('game-title-text');
+        if (name) {
+            titleDiv.innerText = `${name} 的認音挑戰`;
+        } else {
+            titleDiv.innerText = `我的認音挑戰`;
+        }
+    }
+
     function drawScene() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = "#444";
+        ctx.strokeStyle = "#333";
         ctx.lineWidth = 4;
         
         // 畫五線譜
@@ -283,19 +302,20 @@
             ctx.beginPath(); ctx.moveTo(80, y); ctx.lineTo(920, y); ctx.stroke();
         }
 
-        // 譜號調整
-        ctx.fillStyle = "#222"; 
-        ctx.font = `${s * 7}px Arial`; 
-        ctx.fillText("𝄞", 100, (baseLineY - s * 0.4) + clefDown);
+        // 高音譜號
+        ctx.fillStyle = "#111"; 
+        ctx.font = `${s * 7}px serif`; 
+        ctx.fillText("𝄞", 100, (baseLineY - s * 0.4) + clefOffsetY);
 
         if (targetNote) {
-            const steps = stepMap[targetNote]; 
+            const steps = stepData[targetNote]; 
             const y = baseLineY - (steps * (s / 2));
             const x = canvas.width / 2 + 50;
 
             ctx.fillStyle = "black";
             ctx.beginPath();
-            ctx.ellipse(x, y, s * 0.7, s * 0.5, -Math.PI / 8, 0, 2 * Math.PI);
+            // 修改點 4: 音符大小增加 5% (原 0.7/0.5 -> 0.735/0.525)
+            ctx.ellipse(x, y, s * 0.735, s * 0.525, -Math.PI / 8, 0, 2 * Math.PI);
             ctx.fill();
 
             if (targetNote === "C4") {
@@ -304,119 +324,139 @@
         }
     }
 
-    function handleStart(lv) {
-        const input = document.getElementById('playerName').value.trim();
-        if (input.length < 2) {
-            alert("請先輸入你的名字（2-10字）！");
-            return;
-        }
-        pName = input;
+    function startGame(lv) {
         curLv = lv;
-        document.getElementById('title-bar').innerText = `${pName} 的認音挑戰`;
-        document.getElementById('title-bar').style.display = 'block';
-        resetGame();
+        restartGame();
     }
 
-    function resetGame() {
-        score = 0; qCount = 10; isGameOn = true;
-        tStart = new Date();
+    function restartGame() {
+        score = 0; questionsLeft = 10;
+        startTime = new Date();
         document.getElementById('score-val').innerText = "0";
-        document.getElementById('lv-tag').innerText = `LV ${curLv}`;
+        document.getElementById('lv-display').innerText = `LV ${curLv}`;
         document.getElementById('overlay').style.display = 'none';
-        nextQ();
+        nextQuestion();
     }
 
-    // --- 修改點 3: 隨機 3 選項 ---
-    function pickChoices(correct) {
-        const pool = [...new Set(notesSet[curLv].map(n => n.charAt(0)))];
-        let items = [correct];
-        let others = pool.filter(i => i !== correct);
+    // 生成 3 個選項
+    function generateChoices(correctLetter) {
+        const lettersPool = [...new Set(notesMap[curLv].map(n => n.charAt(0)))];
+        let choices = [correctLetter];
         
-        while (items.length < 3 && others.length > 0) {
-            let idx = Math.floor(Math.random() * others.length);
-            items.push(others.splice(idx, 1)[0]);
+        let otherLetters = lettersPool.filter(l => l !== correctLetter);
+        // 打亂錯誤選項池
+        otherLetters.sort(() => Math.random() - 0.5);
+        
+        while (choices.length < 3 && otherLetters.length > 0) {
+            choices.push(otherLetters.pop());
         }
-        items.sort(() => Math.random() - 0.5); // 打亂
+        
+        // 隨機排序 3 個按鈕
+        choices.sort(() => Math.random() - 0.5);
 
         const area = document.getElementById('answer-area');
         area.innerHTML = '';
-        items.forEach(letter => {
-            const b = document.createElement('button');
-            b.className = 'animal-btn';
-            b.onclick = () => checkAns(letter);
-            b.innerHTML = `
-                <img src="${imgMap[letter]}" class="animal-img" onerror="this.src='https://via.placeholder.com/90?text=${letter}'">
-                <div class="animal-name">${letter}</div>
+        choices.forEach(letter => {
+            const btn = document.createElement('button');
+            btn.className = 'animal-btn';
+            btn.onclick = () => checkAnswer(letter);
+            btn.innerHTML = `
+                <img src="${animalImgs[letter]}" class="animal-img" onerror="this.src='https://via.placeholder.com/100?text=${letter}'">
+                <div class="letter-name">${letter}</div>
             `;
-            area.appendChild(b);
+            area.appendChild(btn);
         });
     }
 
-    function checkAns(choice) {
-        if (!isGameOn) return;
-        if (choice === targetNote.charAt(0)) {
+    function checkAnswer(selectedLetter) {
+        if (selectedLetter === targetNote.charAt(0)) {
             score++;
             document.getElementById('score-val').innerText = score;
         }
-        qCount--;
-        if (qCount > 0) nextQ(); else finish();
+        questionsLeft--;
+        if (questionsLeft > 0) {
+            nextQuestion();
+        } else {
+            finishGame();
+        }
     }
 
-    function nextQ() {
-        const p = notesSet[curLv];
-        targetNote = p[Math.floor(Math.random() * p.length)];
-        document.getElementById('count-tag').innerText = `${11 - qCount} / 10`;
-        drawScene();
-        pickChoices(targetNote.charAt(0));
-    }
-
-    function finish() {
-        isGameOn = false;
-        tEnd = new Date();
-        const sec = Math.floor((tEnd - tStart) / 1000);
+    function nextQuestion() {
+        const pool = notesMap[curLv];
+        let nextNote;
         
-        // 儲存排行榜
-        const rec = { name: pName, lv: curLv, score, time: sec, date: new Date().toLocaleDateString() };
-        let history = JSON.parse(localStorage.getItem('cmsRankData') || "[]");
-        history.push(rec);
-        localStorage.setItem('cmsRankData', JSON.stringify(history));
+        // 修改點 3: 防止連續出現同一題 (除非音域只有1個音)
+        do {
+            nextNote = pool[Math.floor(Math.random() * pool.length)];
+        } while (nextNote === lastTargetNote && pool.length > 1);
+        
+        targetNote = nextNote;
+        lastTargetNote = nextNote;
+        
+        document.getElementById('count-display').innerText = `${11 - questionsLeft} / 10`;
+        drawScene();
+        generateChoices(targetNote.charAt(0));
+    }
+
+    function finishGame() {
+        endTime = new Date();
+        const duration = Math.floor((endTime - startTime) / 1000);
+        const nameInput = document.getElementById('playerNameInput').value.trim();
+        const finalName = nameInput || "匿名";
+
+        // 儲存至排行榜
+        const record = { name: finalName, lv: curLv, score, time: duration, date: new Date().toLocaleString() };
+        let history = JSON.parse(localStorage.getItem('cmsNoteRank') || "[]");
+        history.push(record);
+        localStorage.setItem('cmsNoteRank', JSON.stringify(history));
 
         document.getElementById('overlay').style.display = 'flex';
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('end-screen').style.display = 'block';
-        document.getElementById('end-msg').innerText = `${pName}，你獲得了 ${score} 分！`;
-        document.getElementById('time-msg').innerText = `耗時：${sec} 秒`;
+        document.getElementById('menu-view').style.display = 'none';
+        document.getElementById('rank-view').style.display = 'none';
+        document.getElementById('result-view').style.display = 'block';
+        
+        document.getElementById('result-text').innerText = `${finalName}，你獲得了 ${score} 分！`;
+        document.getElementById('time-text').innerText = `完成耗時：${duration} 秒`;
     }
 
-    function loadRank(filter) {
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('rank-screen').style.display = 'block';
-        
+    function showRank() {
+        document.getElementById('menu-view').style.display = 'none';
+        document.getElementById('result-view').style.display = 'none';
+        document.getElementById('rank-view').style.display = 'flex';
+        updateRankUI('all');
+    }
+
+    function updateRankUI(filter) {
         const tabs = document.querySelectorAll('.tab-btn');
         tabs.forEach(t => t.classList.toggle('active', (filter === 'all' && t.innerText === '全部') || t.innerText === `LV ${filter}`));
 
-        let data = JSON.parse(localStorage.getItem('cmsRankData') || "[]");
+        let data = JSON.parse(localStorage.getItem('cmsNoteRank') || "[]");
         if (filter !== 'all') data = data.filter(d => d.lv === filter);
         
-        // 排序邏輯
+        // 排序：分數多 > 時間少 > 日期早
         data.sort((a, b) => (b.score - a.score) || (a.time - b.time));
 
-        const list = document.getElementById('rank-list');
-        list.innerHTML = data.slice(0, 10).map((d, i) => `
-            <tr><td>${i+1}</td><td>${d.name}</td><td>${d.lv}</td><td>${d.score}</td><td>${d.time}s</td><td>${d.date}</td></tr>
-        `).join('') || '<tr><td colspan="6">尚無紀錄</td></tr>';
+        const body = document.getElementById('rank-body');
+        body.innerHTML = data.slice(0, 15).map((d, i) => `
+            <tr><td>${i+1}</td><td>${d.name}</td><td>${d.lv}</td><td>${d.score}</td><td>${d.time}s</td><td>${d.date.split(' ')[0]}</td></tr>
+        `).join('') || '<tr><td colspan="6">尚未有紀錄</td></tr>';
     }
 
-    function viewRank() { loadRank('all'); }
-    function clearRank() { if(confirm("確定清除？")) { localStorage.removeItem('cmsRankData'); loadRank('all'); } }
-    function goHome() { 
-        document.getElementById('title-bar').style.display = 'none';
+    function clearRank() {
+        if (confirm("確定要清除所有排行榜紀錄嗎？")) {
+            localStorage.removeItem('cmsNoteRank');
+            updateRankUI('all');
+        }
+    }
+
+    function goHome() {
         document.getElementById('overlay').style.display = 'flex';
-        document.getElementById('start-screen').style.display = 'block';
-        document.getElementById('end-screen').style.display = 'none';
-        document.getElementById('rank-screen').style.display = 'none';
+        document.getElementById('menu-view').style.display = 'block';
+        document.getElementById('result-view').style.display = 'none';
+        document.getElementById('rank-view').style.display = 'none';
     }
 
+    updatePersonalTitle();
     window.onload = drawScene;
 </script>
 </body>
