@@ -59,10 +59,11 @@
             border: 2px solid var(--wood-brown);
         }
 
+        /* 置中題目區域的綠框 */
         #canvas-wrapper {
             background: white;
             border-radius: 20px;
-            border: 5px solid var(--leaf-green); /* 題目置中的綠框 */
+            border: 5px solid var(--leaf-green);
             margin: 10px 0;
             overflow: hidden;
             display: flex;
@@ -110,7 +111,7 @@
         }
 
         .letter-name {
-            /* 再次放大 50%：原本設定為 2rem，現在調整為 3rem */
+            /* 字體放大 50% */
             font-size: 3rem; 
             font-weight: bold;
             color: var(--wood-brown);
@@ -160,6 +161,7 @@
             width: 280px;
         }
 
+        /* 排行榜版面 */
         .rank-table {
             width: 100%;
             border-collapse: collapse;
@@ -196,7 +198,7 @@
     <div id="overlay">
         <div id="menu-view">
             <h1 style="font-size: 3rem; margin-bottom: 20px;">CMS認音大挑戰</h1>
-            <p style="color: var(--wood-brown); font-weight: bold; font-size: 1.2rem;">挑戰開始！請選擇等級：</p>
+            <p style="color: var(--wood-brown); font-weight: bold; font-size: 1.2rem;">請選擇等級開始挑戰：</p>
             <div style="display: flex; flex-wrap: wrap; justify-content: center; max-width: 700px;">
                 <button class="btn-forest" onclick="startGame(1)">Level 1 (C, D, E)</button>
                 <button class="btn-forest" onclick="startGame(2)">Level 2 (C - G)</button>
@@ -213,7 +215,7 @@
             <p id="time-text" style="color: var(--wood-brown); font-weight: bold; font-size: 1.3rem;"></p>
             
             <div class="input-group">
-                <p style="margin-bottom: 10px;">想把成績記錄在排行榜嗎？</p>
+                <p style="margin-bottom: 10px;">想在排行榜記錄你的成績嗎？</p>
                 <input type="text" id="playerNameInput" placeholder="請輸入你的名字（選填）" maxlength="10">
             </div>
 
@@ -253,9 +255,10 @@
     let questionsLeft = 10;
     let startTime, endTime;
 
-    // --- 修改點 5: 線距增加 8 (45 -> 53 + 原有設定 = 73) ---
-    const s = 73; 
-    const clefDownTotal = 40; // 譜號總下移量 (30 + 10)
+    // --- 修改點 1: 線距再增加 3 (73 -> 76) ---
+    const s = 76; 
+    // --- 修改點 2: 高音譜號再下移 5px (40 -> 45) ---
+    const clefDownTotal = 45; 
 
     const notesMap = {
         1: ["C4", "D4", "E4"],
@@ -278,10 +281,8 @@
     function drawScene() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // --- 修改點 2: 計算置中座標 ---
-        // 五線譜總高度 = (線數-1) * s。Level 5 最大高度為 4 * s
+        // --- 修改點: 計算五線譜垂直置中於畫布 ---
         const staffHeight = (curLv - 1) * s;
-        // 起點 Y 軸 = (畫布高 + 總高度) / 2
         const baseLineY = (canvas.height + staffHeight) / 2;
 
         ctx.strokeStyle = "#333";
@@ -293,10 +294,10 @@
             ctx.beginPath(); ctx.moveTo(100, y); ctx.lineTo(900, y); ctx.stroke();
         }
 
-        // --- 修改點 5: 譜號縮小 10% 且下移 ---
-        // 原比例約 s*7, 縮小後約 s*6.3
+        // --- 修改點 2: 高音譜號放大 10% 且下移 ---
+        // 原比例約 s*6.3 (縮小10%後)，現在放大10%回補後約為 s*6.9 
         ctx.fillStyle = "#111"; 
-        ctx.font = `${s * 6.3}px serif`; 
+        ctx.font = `${s * 6.9}px serif`; 
         ctx.fillText("𝄞", 120, (baseLineY - s * 0.4) + clefDownTotal);
 
         if (targetNote) {
@@ -306,7 +307,7 @@
 
             ctx.fillStyle = "black";
             ctx.beginPath();
-            // 音符大小放大比例 (1.5 * 1.05 = 1.575)
+            // 音符大小保持 50% 放大後的適配尺寸
             ctx.ellipse(x, y, s * 0.74, s * 0.53, -Math.PI / 8, 0, 2 * Math.PI);
             ctx.fill();
 
@@ -329,6 +330,7 @@
     function nextQuestion() {
         const pool = notesMap[curLv];
         let nextNote;
+        // 不連續出現同一道題目
         do {
             nextNote = pool[Math.floor(Math.random() * pool.length)];
         } while (nextNote === lastTargetNote && pool.length > 1);
@@ -347,6 +349,7 @@
         let others = pool.filter(l => l !== correctLetter).sort(() => Math.random() - 0.5);
         
         while (choices.length < 3 && others.length > 0) choices.push(others.pop());
+        // 選項隨機排列
         choices.sort(() => Math.random() - 0.5);
 
         const area = document.getElementById('answer-area');
@@ -382,7 +385,6 @@
         document.getElementById('time-text').innerText = `完成耗時：${duration} 秒`;
     }
 
-    // --- 修改點 1: 完成後才儲存名稱 ---
     function saveRecord() {
         const duration = Math.floor((endTime - startTime) / 1000);
         const nameInput = document.getElementById('playerNameInput').value.trim();
@@ -391,7 +393,7 @@
         let history = JSON.parse(localStorage.getItem('cmsNoteRank') || "[]");
         history.push(record);
         localStorage.setItem('cmsNoteRank', JSON.stringify(history));
-        document.getElementById('playerNameInput').value = ""; // 清空輸入
+        document.getElementById('playerNameInput').value = ""; 
     }
 
     function submitAndRestart() {
@@ -428,8 +430,6 @@
         document.getElementById('result-view').style.display = 'none';
         document.getElementById('rank-view').style.display = 'none';
     }
-
-    function restartGame() { startGame(curLv); }
 
     window.onload = () => drawScene();
 </script>
