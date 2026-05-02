@@ -111,8 +111,7 @@
         }
 
         .letter-name {
-            /* 字體放大 50% */
-            font-size: 3rem; 
+            font-size: 3rem; /* 已放大 50% */
             font-weight: bold;
             color: var(--wood-brown);
             font-family: var(--text-serif);
@@ -161,7 +160,16 @@
             width: 280px;
         }
 
-        /* 排行榜版面 */
+        /* 排行榜版面調整：垂直排列 */
+        #rank-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 95%;
+            height: 100%;
+            justify-content: center;
+        }
+
         .rank-table {
             width: 100%;
             border-collapse: collapse;
@@ -170,10 +178,18 @@
         .rank-table th { background: var(--leaf-green); padding: 12px; color: white; }
         .rank-table td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
 
+        .tab-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
         .tab-btn {
             font-family: var(--text-serif);
             padding: 8px 15px; border-radius: 12px; border: 2px solid var(--forest-green);
-            background: white; cursor: pointer; margin: 0 3px; font-weight: bold;
+            background: white; cursor: pointer; font-weight: bold;
         }
         .tab-btn.active { background: var(--forest-green); color: white; }
     </style>
@@ -223,9 +239,9 @@
             <button class="btn-forest" style="background: var(--leaf-green); color: var(--forest-green);" onclick="submitAndGoHome()">記錄並回首頁</button>
         </div>
 
-        <div id="rank-view" style="display: none; width: 95%;">
-            <h1 style="margin-top: 0;">CMS認音大挑戰 - 高手排行榜</h1>
-            <div>
+        <div id="rank-view" style="display: none;">
+            <h1 style="margin-top: 0; font-size: 2rem;">CMS認音大挑戰 - 高手排行榜</h1>
+            <div class="tab-group">
                 <button class="tab-btn active" onclick="updateRankUI('all')">全部</button>
                 <button class="tab-btn" onclick="updateRankUI(1)">LV 1</button>
                 <button class="tab-btn" onclick="updateRankUI(2)">LV 2</button>
@@ -233,13 +249,13 @@
                 <button class="tab-btn" onclick="updateRankUI(4)">LV 4</button>
                 <button class="tab-btn" onclick="updateRankUI(5)">LV 5</button>
             </div>
-            <div style="max-height: 320px; overflow-y: auto; background: white; border-radius: 15px; width: 100%; margin: 20px 0;">
+            <div style="max-height: 350px; overflow-y: auto; background: white; border-radius: 15px; width: 100%; margin: 10px 0;">
                 <table class="rank-table">
                     <thead><tr><th>排名</th><th>名稱</th><th>LV</th><th>分數</th><th>耗時</th><th>日期</th></tr></thead>
                     <tbody id="rank-body"></tbody>
                 </table>
             </div>
-            <button class="btn-forest" style="width: 200px;" onclick="goHome()">回首頁</button>
+            <button class="btn-forest" style="width: 200px; margin-top: 10px;" onclick="goHome()">回首頁</button>
         </div>
     </div>
 </div>
@@ -255,10 +271,10 @@
     let questionsLeft = 10;
     let startTime, endTime;
 
-    // --- 修改點 1: 線距再增加 3 (73 -> 76) ---
-    const s = 76; 
-    // --- 修改點 2: 高音譜號再下移 5px (40 -> 45) ---
-    const clefDownTotal = 45; 
+    // --- 修改點 2: 線距再增加 3 (76 -> 79) ---
+    const s = 79; 
+    // --- 修改點 3: 高音譜號再下移 10px (45 -> 55) ---
+    const clefDownTotal = 55; 
 
     const notesMap = {
         1: ["C4", "D4", "E4"],
@@ -281,24 +297,22 @@
     function drawScene() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // --- 修改點: 計算五線譜垂直置中於畫布 ---
+        // --- 垂直置中五線譜 ---
         const staffHeight = (curLv - 1) * s;
         const baseLineY = (canvas.height + staffHeight) / 2;
 
         ctx.strokeStyle = "#333";
         ctx.lineWidth = 5;
         
-        // 畫五線譜
         for (let i = 0; i < curLv; i++) {
             let y = baseLineY - (i * s);
             ctx.beginPath(); ctx.moveTo(100, y); ctx.lineTo(900, y); ctx.stroke();
         }
 
-        // --- 修改點 2: 高音譜號放大 10% 且下移 ---
-        // 原比例約 s*6.3 (縮小10%後)，現在放大10%回補後約為 s*6.9 
+        // --- 修改點 3: 高音譜號放大 20% (由 6.9 提高至約 8.3) 且下移 ---
         ctx.fillStyle = "#111"; 
-        ctx.font = `${s * 6.9}px serif`; 
-        ctx.fillText("𝄞", 120, (baseLineY - s * 0.4) + clefDownTotal);
+        ctx.font = `${s * 8.3}px serif`; 
+        ctx.fillText("𝄞", 110, (baseLineY - s * 0.4) + clefDownTotal);
 
         if (targetNote) {
             const steps = stepData[targetNote]; 
@@ -307,7 +321,7 @@
 
             ctx.fillStyle = "black";
             ctx.beginPath();
-            // 音符大小保持 50% 放大後的適配尺寸
+            // 音符大小隨線距適配
             ctx.ellipse(x, y, s * 0.74, s * 0.53, -Math.PI / 8, 0, 2 * Math.PI);
             ctx.fill();
 
@@ -330,7 +344,6 @@
     function nextQuestion() {
         const pool = notesMap[curLv];
         let nextNote;
-        // 不連續出現同一道題目
         do {
             nextNote = pool[Math.floor(Math.random() * pool.length)];
         } while (nextNote === lastTargetNote && pool.length > 1);
@@ -349,7 +362,6 @@
         let others = pool.filter(l => l !== correctLetter).sort(() => Math.random() - 0.5);
         
         while (choices.length < 3 && others.length > 0) choices.push(others.pop());
-        // 選項隨機排列
         choices.sort(() => Math.random() - 0.5);
 
         const area = document.getElementById('answer-area');
