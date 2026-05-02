@@ -11,6 +11,8 @@
             --wood-brown: #604439;
             --sand-light: #F8F4E3;
             --text-serif: "Times New Roman", "SimSun", "PMingLiU", serif;
+            --correct-green: #90EE90;
+            --wrong-red: #FFB3B3;
         }
 
         body {
@@ -59,7 +61,6 @@
             border: 2px solid var(--wood-brown);
         }
 
-        /* 綠框放大 3% */
         #canvas-wrapper {
             background: white;
             border-radius: 25px;
@@ -100,6 +101,26 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
+        }
+
+        /* 答錯抖動動畫 */
+        .shake-btn { animation: shakeEffect 0.3s ease-in-out 0s 1; }
+        @keyframes shakeEffect { 
+            0%, 100% { transform: translateX(0); } 
+            25% { transform: translateX(-3px); } 
+            75% { transform: translateX(3px); } 
+        }
+
+        /* 答對/答錯符號樣式 */
+        .feedback-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            pointer-events: none;
+            z-index: 10;
         }
 
         .animal-btn:active {
@@ -115,7 +136,7 @@
         }
 
         .letter-name {
-            font-size: 3rem; /* 字母放大 50% */
+            font-size: 3rem; 
             font-weight: bold;
             color: var(--wood-brown);
             font-family: var(--text-serif);
@@ -271,9 +292,8 @@
     let questionsLeft = 10;
     let startTime, endTime;
 
-    // --- 修改點：座標基準設定 ---
-    const s = 91; // 線距減少 3 (目前保留值)
-    const clefDownTotal = 90; // 高音譜號下移 15px (累計值)
+    const s = 91; 
+    const clefDownTotal = 90; 
 
     const notesMap = {
         1: ["C4", "D4", "E4"],
@@ -296,23 +316,18 @@
     function drawScene() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // --- 修改點 1：修正 Level 1-4 的題目位置，以 Level 5 為固定基準 ---
-        // 強制計算「5 條線」時的總高度，作為垂直置中的基準。
         const fixedMaxLines = 5;
         const fixedStaffHeight = (fixedMaxLines - 1) * s;
-        // baseLineY (第一線位置) 永遠以 5 條線的情況計算，確保座標系統固定。
         const baseLineY = (canvas.height + fixedStaffHeight) / 2;
 
         ctx.strokeStyle = "#333";
         ctx.lineWidth = 5;
         
-        // 畫五線譜：循環依據當前等級 (curLv) 畫線，但位置與 Level 5 的底部對齊。
         for (let i = 0; i < curLv; i++) {
             let y = baseLineY - (i * s);
             ctx.beginPath(); ctx.moveTo(100, y); ctx.lineTo(900, y); ctx.stroke();
         }
 
-        // 高音譜號 (放大 20% + 下移 90px，基準座標隨 baseLineY 固定)
         ctx.fillStyle = "#111"; 
         ctx.font = `${s * 8.6}px serif`; 
         ctx.fillText("𝄞", 110, (baseLineY - s * 0.4) + clefDownTotal);
@@ -324,7 +339,6 @@
 
             ctx.fillStyle = "black";
             ctx.beginPath();
-            // 音符縮小 10% (s * 0.666)
             ctx.ellipse(x, y, s * 0.666, s * 0.477, -Math.PI / 8, 0, 2 * Math.PI);
             ctx.fill();
 
@@ -373,12 +387,45 @@
             const btn = document.createElement('button');
             btn.className = 'animal-btn';
             btn.onclick = () => {
+                /* 答對視覺效果 */
                 if (letter === targetNote.charAt(0)) {
+                    btn.style.backgroundColor = 'var(--correct-green)';
+                    const icon = document.createElement('span');
+                    icon.className = 'feedback-icon';
+                    icon.innerText = '✔️';
+                    btn.appendChild(icon);
+
                     score++;
                     document.getElementById('score-val').innerText = score;
+
+                    setTimeout(() => {
+                        btn.style.backgroundColor = '#FFF';
+                        if(btn.contains(icon)) btn.removeChild(icon);
+                    }, 400);
+                } 
+                /* 答錯視覺效果 */
+                else {
+                    btn.style.backgroundColor = 'var(--wrong-red)';
+                    btn.classList.add('shake-btn');
+                    const icon = document.createElement('span');
+                    icon.className = 'feedback-icon';
+                    icon.innerText = '❌';
+                    btn.appendChild(icon);
+
+                    setTimeout(() => {
+                        btn.style.backgroundColor = '#FFF';
+                        btn.classList.remove('shake-btn');
+                        if(btn.contains(icon)) btn.removeChild(icon);
+                    }, 400);
                 }
+
                 questionsLeft--;
-                if (questionsLeft > 0) nextQuestion(); else showResult();
+                if (questionsLeft > 0) {
+                    // 立即呼叫下一個問題，視覺效果會在背景由 setTimeout 處理
+                    nextQuestion(); 
+                } else {
+                    showResult();
+                }
             };
             btn.innerHTML = `
                 <img src="${animalImgs[letter]}" class="animal-img" onerror="this.src='https://via.placeholder.com/90?text=${letter}'">
