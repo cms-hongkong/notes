@@ -1,1 +1,353 @@
 
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>樂譜練習 - Level 1-5</title>
+    <style>
+        :root {
+            --mint: #B2F2BB;
+            --pink: #FFD6E0;
+            --blue: #A2D2FF;
+            --yellow: #FEF9E7;
+            --text: #5B5B5B;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(180deg, #E3F2FD 0%, #F3E5F5 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text);
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #game-container {
+            background: white;
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 0px #CBD5E0, 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 900px;
+            position: relative;
+            text-align: center;
+            border: 6px solid white;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .score-board, .level-badge {
+            background: var(--yellow);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 2px solid #FAD7A0;
+        }
+
+        h1 { font-size: 1.5rem; margin: 0; color: #FF85A1; width: 100%; }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+            background: white;
+            border-radius: 15px;
+            margin: 10px 0;
+        }
+
+        #letter-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .letter-btn {
+            width: 65px;
+            height: 65px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+        }
+
+        .letter-btn:active { transform: translateY(6px); box-shadow: none; }
+
+        .btn-C { background-color: #FF6B6B; } .btn-D { background-color: #FF9F43; }
+        .btn-E { background-color: #FDB813; } .btn-F { background-color: #1DD1A1; }
+        .btn-G { background-color: #48DBFB; } .btn-A { background-color: #5F27CD; }
+        .btn-B { background-color: #FF9FF3; }
+
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .btn-fancy {
+            background: #FF85A1; color: white; padding: 12px 30px;
+            border-radius: 50px; font-size: 1.2rem; border: none;
+            cursor: pointer; box-shadow: 0 5px 0 #D6336C;
+            font-weight: bold; margin: 8px; width: 220px;
+        }
+
+        #feedback-container {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .animal-head {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background-color: white;
+            object-fit: cover;
+        }
+
+        .feedback-note {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #FF85A1;
+            text-shadow: 2px 2px 0 white;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header">
+        <h1>Music Note Master</h1>
+        <div class="level-badge" id="current-level-display">LV 1</div>
+        <div class="score-board">⭐ <span id="score">0</span></div>
+    </div>
+
+    <canvas id="staffCanvas" width="1000" height="400"></canvas>
+    
+    <div id="feedback-container">
+        <canvas id="animalCropCanvas" width="150" height="150" style="border-radius: 50%; border: 5px solid white; display:none;"></canvas>
+        <img id="animalHeadImg" class="animal-head" src="" alt="animal">
+        <div class="feedback-note" id="feedback-letter">C</div>
+    </div>
+
+    <div id="letter-buttons">
+        <button class="letter-btn btn-C" onclick="handleInput('C')">C</button>
+        <button class="letter-btn btn-D" onclick="handleInput('D')">D</button>
+        <button class="letter-btn btn-E" onclick="handleInput('E')">E</button>
+        <button class="letter-btn btn-F" onclick="handleInput('F')">F</button>
+        <button class="letter-btn btn-G" onclick="handleInput('G')">G</button>
+        <button class="letter-btn btn-A" onclick="handleInput('A')">A</button>
+        <button class="letter-btn btn-B" onclick="handleInput('B')">B</button>
+    </div>
+
+    <div id="overlay">
+        <h2 style="color: #5B5B5B;">選擇練習等級</h2>
+        <button class="btn-fancy" onclick="startGame(1)">Level 1 (C, D, E)</button>
+        <button class="btn-fancy" onclick="startGame(2)">Level 2 (C - G)</button>
+        <button class="btn-fancy" onclick="startGame(3)">Level 3 (C - B)</button>
+        <button class="btn-fancy" onclick="startGame(4)">Level 4 (C - D')</button>
+        <button class="btn-fancy" onclick="startGame(5)">Level 5 (C - G')</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('staffCanvas');
+    const ctx = canvas.getContext('2d');
+    const fbContainer = document.getElementById('feedback-container');
+    const fbLetter = document.getElementById('feedback-letter');
+    const animalHeadImg = document.getElementById('animalHeadImg');
+
+    let currentLevel = 1;
+    let score = 0;
+    let targetNote = "";
+    let gameActive = false;
+
+    const s = 30; // 線與線的間距
+    const centerY = canvas.height / 2 + 20;
+
+    // 定義各等級音域
+    const levels = {
+        1: ["C4", "D4", "E4"],
+        2: ["C4", "D4", "E4", "F4", "G4"],
+        3: ["C4", "D4", "E4", "F4", "G4", "A4", "B4"],
+        4: ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5"],
+        5: ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5", "E5", "F5", "G5"]
+    };
+
+    const noteStepMap = {
+        "C4": -2, "D4": -1, "E4": 0, "F4": 1, "G4": 2, "A4": 3, "B4": 4,
+        "C5": 5, "D5": 6, "E5": 7, "F5": 8, "G5": 9
+    };
+
+    // 動物設定
+    const animalConfig = {
+        'C': 'cat.jpg', 'D': 'dog.jpg', 'E': 'elephant.jpg',
+        'F': 'frog.jpg', 'G': 'giraffe.jpg', 'A': 'ape.jpg', 'B': 'bear.jpg'
+    };
+
+    // 預加載圖片並處理裁切
+    const animalCache = {};
+    function preloadAnimals() {
+        Object.keys(animalConfig).forEach(key => {
+            const img = new Image();
+            img.src = animalConfig[key];
+            img.onload = () => {
+                // 這裡實作自動裁切邏輯：取中間正方形
+                const cropCanvas = document.createElement('canvas');
+                const size = 200;
+                cropCanvas.width = size;
+                cropCanvas.height = size;
+                const cctx = cropCanvas.getContext('2d');
+                
+                const minSide = Math.min(img.width, img.height);
+                cctx.drawImage(img, 
+                    (img.width - minSide) / 2, (img.height - minSide) / 2, minSide, minSide, 
+                    0, 0, size, size);
+                animalCache[key] = cropCanvas.toDataURL();
+            };
+        });
+    }
+
+    function drawStaff() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#D1D5DB";
+        ctx.lineWidth = 3;
+
+        // 根據 Level 決定畫幾條線 (Level 1 畫 1 條, ..., Level 5 畫 5 條)
+        // 這些線固定從最底部的那條線（第一線）開始向上畫
+        const linesToDraw = currentLevel;
+        for (let i = 0; i < linesToDraw; i++) {
+            let y = centerY - (i * s);
+            ctx.beginPath();
+            ctx.moveTo(100, y);
+            ctx.lineTo(900, y);
+            ctx.stroke();
+        }
+
+        // 繪製 G 譜號 (僅在 Level 3 以上建議顯示，或全顯示)
+        ctx.fillStyle = "#5B5B5B";
+        ctx.font = "180px Arial";
+        ctx.fillText("𝄞", 120, centerY - s * 0.5);
+
+        if (targetNote) renderNote();
+    }
+
+    function renderNote() {
+        const steps = noteStepMap[targetNote]; 
+        // 這裡的 y 座標相對於第一線(E4)
+        const y = centerY - (steps * (s / 2));
+        const x = canvas.width / 2;
+
+        ctx.strokeStyle = "#333";
+        ctx.fillStyle = "#333";
+        ctx.lineWidth = 4;
+
+        // 畫音符主體
+        ctx.beginPath();
+        ctx.ellipse(x, y, s * 0.7, s * 0.5, -Math.PI / 8, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+
+        // 畫加線 (下加一線 C4)
+        if (targetNote === "C4") {
+            ctx.beginPath();
+            ctx.moveTo(x - 30, y);
+            ctx.lineTo(x + 30, y);
+            ctx.stroke();
+        }
+    }
+
+    function handleInput(letter) {
+        if (!gameActive) return;
+
+        const correctLetter = targetNote.charAt(0);
+        if (letter === correctLetter) {
+            score += 10;
+            document.getElementById('score').innerText = score;
+            showSuccess(correctLetter);
+            next();
+        } else {
+            // 答錯抖動效果
+            canvas.style.transform = "translateX(10px)";
+            setTimeout(() => canvas.style.transform = "translateX(0)", 100);
+        }
+    }
+
+    function showSuccess(letter) {
+        fbLetter.innerText = targetNote.replace('4','').replace('5','\'');
+        animalHeadImg.src = animalCache[letter] || ""; 
+        
+        fbContainer.style.display = 'flex';
+        fbContainer.style.animation = 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        
+        setTimeout(() => {
+            fbContainer.style.display = 'none';
+        }, 800);
+    }
+
+    function next() {
+        const pool = levels[currentLevel];
+        let newNote;
+        do {
+            newNote = pool[Math.floor(Math.random() * pool.length)];
+        } while (newNote === targetNote && pool.length > 1);
+        
+        targetNote = newNote;
+        drawStaff();
+    }
+
+    function startGame(lv) {
+        currentLevel = lv;
+        score = 0;
+        gameActive = true;
+        document.getElementById('score').innerText = "0";
+        document.getElementById('current-level-display').innerText = `LV ${lv}`;
+        document.getElementById('overlay').style.display = 'none';
+        next();
+    }
+
+    // 初始加載
+    preloadAnimals();
+    drawStaff();
+
+</script>
+
+<style>
+    @keyframes popIn {
+        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+</style>
+
+</body>
+</html>
