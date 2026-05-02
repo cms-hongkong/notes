@@ -59,7 +59,7 @@
             border: 2px solid var(--wood-brown);
         }
 
-        /* 綠框放大 3% 效果 */
+        /* 綠框放大 3% */
         #canvas-wrapper {
             background: white;
             border-radius: 25px;
@@ -115,7 +115,7 @@
         }
 
         .letter-name {
-            font-size: 3rem; /* 字母字體放大 50% */
+            font-size: 3rem; /* 字母放大 50% */
             font-weight: bold;
             color: var(--wood-brown);
             font-family: var(--text-serif);
@@ -161,7 +161,6 @@
             margin: 15px 0;
         }
 
-        /* 排行榜垂直排列佈局 */
         #rank-view {
             display: flex;
             flex-direction: column;
@@ -215,7 +214,7 @@
     <div id="overlay">
         <div id="menu-view">
             <h1 style="font-size: 3rem; margin-bottom: 20px;">CMS認音大挑戰</h1>
-            <p style="color: var(--wood-brown); font-weight: bold; font-size: 1.2rem;">歡迎挑戰！請選擇等級：</p>
+            <p style="color: var(--wood-brown); font-weight: bold; font-size: 1.2rem;">挑戰開始！請選擇等級：</p>
             <div style="display: flex; flex-wrap: wrap; justify-content: center; max-width: 700px;">
                 <button class="btn-forest" onclick="startGame(1)">Level 1 (C, D, E)</button>
                 <button class="btn-forest" onclick="startGame(2)">Level 2 (C - G)</button>
@@ -272,9 +271,9 @@
     let questionsLeft = 10;
     let startTime, endTime;
 
-    // --- 修改點 2：線距減少 3 (94 -> 91) ---
-    const s = 91; 
-    const clefDownTotal = 90; // 高音譜號下移量 (已保留 15px 的調整)
+    // --- 修改點：座標基準設定 ---
+    const s = 91; // 線距減少 3 (目前保留值)
+    const clefDownTotal = 90; // 高音譜號下移 15px (累計值)
 
     const notesMap = {
         1: ["C4", "D4", "E4"],
@@ -297,20 +296,23 @@
     function drawScene() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // 題目置中於綠框區域
-        const staffHeight = (curLv - 1) * s;
-        const baseLineY = (canvas.height + staffHeight) / 2;
+        // --- 修改點 1：修正 Level 1-4 的題目位置，以 Level 5 為固定基準 ---
+        // 強制計算「5 條線」時的總高度，作為垂直置中的基準。
+        const fixedMaxLines = 5;
+        const fixedStaffHeight = (fixedMaxLines - 1) * s;
+        // baseLineY (第一線位置) 永遠以 5 條線的情況計算，確保座標系統固定。
+        const baseLineY = (canvas.height + fixedStaffHeight) / 2;
 
         ctx.strokeStyle = "#333";
         ctx.lineWidth = 5;
         
-        // 畫五線譜
+        // 畫五線譜：循環依據當前等級 (curLv) 畫線，但位置與 Level 5 的底部對齊。
         for (let i = 0; i < curLv; i++) {
             let y = baseLineY - (i * s);
             ctx.beginPath(); ctx.moveTo(100, y); ctx.lineTo(900, y); ctx.stroke();
         }
 
-        // 高音譜號 (維持放大 20% + 下移設定)
+        // 高音譜號 (放大 20% + 下移 90px，基準座標隨 baseLineY 固定)
         ctx.fillStyle = "#111"; 
         ctx.font = `${s * 8.6}px serif`; 
         ctx.fillText("𝄞", 110, (baseLineY - s * 0.4) + clefDownTotal);
@@ -322,8 +324,7 @@
 
             ctx.fillStyle = "black";
             ctx.beginPath();
-            // --- 修改點 1：音符縮小 10% ---
-            // 原比例約 s * 0.74, 縮小 10% 後約為 s * 0.666
+            // 音符縮小 10% (s * 0.666)
             ctx.ellipse(x, y, s * 0.666, s * 0.477, -Math.PI / 8, 0, 2 * Math.PI);
             ctx.fill();
 
