@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>樂譜練習 - Level 1-5</title>
+    <title>樂譜練習 - 挑戰排行榜版</title>
     <style>
         :root {
             --mint: #B2F2BB;
@@ -33,7 +32,7 @@
             border-radius: 30px;
             box-shadow: 0 10px 0px #CBD5E0, 0 20px 40px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             position: relative;
             text-align: center;
             border: 6px solid white;
@@ -48,7 +47,16 @@
             gap: 10px;
         }
 
-        .score-board, .level-badge {
+        .player-info {
+            width: 100%;
+            font-size: 1.4rem;
+            color: #FF85A1;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: none;
+        }
+
+        .score-board, .level-badge, .count-badge {
             background: var(--yellow);
             padding: 8px 15px;
             border-radius: 20px;
@@ -57,12 +65,10 @@
             border: 2px solid #FAD7A0;
         }
 
-        h1 { font-size: 1.5rem; margin: 0; color: #FF85A1; width: 100%; }
-
         canvas {
             width: 100%;
             height: auto;
-            max-height: 300px;
+            max-height: 450px;
             background: white;
             border-radius: 15px;
             margin: 10px 0;
@@ -99,20 +105,37 @@
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 25px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 100;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input#playerNameInput {
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            border-radius: 15px;
+            border: 3px solid var(--pink);
+            outline: none;
+            text-align: center;
+            width: 200px;
         }
 
         .btn-fancy {
             background: #FF85A1; color: white; padding: 12px 30px;
             border-radius: 50px; font-size: 1.2rem; border: none;
             cursor: pointer; box-shadow: 0 5px 0 #D6336C;
-            font-weight: bold; margin: 8px; width: 220px;
+            font-weight: bold; margin: 8px; width: 260px;
         }
 
         #feedback-container {
@@ -127,7 +150,7 @@
         }
 
         .animal-head {
-            width: 120px; height: 120px;
+            width: 140px; height: 140px;
             border-radius: 50%;
             border: 5px solid white;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
@@ -136,26 +159,57 @@
         }
 
         .feedback-note {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 900;
             color: #FF85A1;
             text-shadow: 2px 2px 0 white;
         }
+
+        /* 排行榜表格樣式 */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            border-bottom: 1px solid #eee;
+            padding: 8px;
+            text-align: center;
+        }
+        .leaderboard-table th { background-color: var(--yellow); }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .tab-btn {
+            padding: 5px 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .tab-btn.active { background: var(--pink); border-color: #FF85A1; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <div id="player-title" class="player-info">〔玩家〕的認音挑戰</div>
     <div class="header">
-        <h1>Music Note Master</h1>
         <div class="level-badge" id="current-level-display">LV 1</div>
+        <div class="count-badge" id="count-display">1 / 10</div>
         <div class="score-board">⭐ <span id="score">0</span></div>
     </div>
 
-    <canvas id="staffCanvas" width="1000" height="400"></canvas>
+    <canvas id="staffCanvas" width="1000" height="500"></canvas>
     
     <div id="feedback-container">
-        <canvas id="animalCropCanvas" width="150" height="150" style="border-radius: 50%; border: 5px solid white; display:none;"></canvas>
         <img id="animalHeadImg" class="animal-head" src="" alt="animal">
         <div class="feedback-note" id="feedback-letter">C</div>
     </div>
@@ -171,12 +225,55 @@
     </div>
 
     <div id="overlay">
-        <h2 style="color: #5B5B5B;">選擇練習等級</h2>
-        <button class="btn-fancy" onclick="startGame(1)">Level 1 (C, D, E)</button>
-        <button class="btn-fancy" onclick="startGame(2)">Level 2 (C - G)</button>
-        <button class="btn-fancy" onclick="startGame(3)">Level 3 (C - B)</button>
-        <button class="btn-fancy" onclick="startGame(4)">Level 4 (C - D')</button>
-        <button class="btn-fancy" onclick="startGame(5)">Level 5 (C - G')</button>
+        <div id="menu-view">
+            <h2 style="color: #FF85A1;">歡迎來到認音大挑戰！🍭</h2>
+            <div class="input-group">
+                <p style="margin-bottom: 8px;">請輸入你的名字 (2-10字):</p>
+                <input type="text" id="playerNameInput" placeholder="你的名字..." maxlength="10">
+            </div>
+            <p style="margin-top: 0; font-size: 0.9rem; color: #888;">選擇等級開始遊戲：</p>
+            <button class="btn-fancy" onclick="checkStart(1)">Level 1 (C, D, E)</button>
+            <button class="btn-fancy" onclick="checkStart(2)">Level 2 (C - G)</button>
+            <button class="btn-fancy" onclick="checkStart(3)">Level 3 (C - B)</button>
+            <button class="btn-fancy" onclick="checkStart(4)">Level 4 (C - D')</button>
+            <button class="btn-fancy" onclick="checkStart(5)">Level 5 (C - G')</button>
+            <br>
+            <button class="btn-fancy" style="background: var(--blue); box-shadow: 0 5px 0 #5DA9EE; width: 180px; font-size: 1rem;" onclick="showLeaderboard()">查看排行榜 🏆</button>
+        </div>
+
+        <div id="result-view" style="display: none;">
+            <h2 id="result-title" style="color: #FF85A1; font-size: 2rem;">太棒了！</h2>
+            <p id="result-text" style="font-size: 1.5rem;"></p>
+            <p id="time-text" style="color: #666;"></p>
+            <button class="btn-fancy" onclick="restartGame()">再玩一次</button>
+            <button class="btn-fancy" style="background: var(--blue); box-shadow: 0 5px 0 #5DA9EE;" onclick="showMenu()">切換等級 / 首頁</button>
+        </div>
+
+        <div id="leaderboard-view" style="display: none; width: 90%;">
+            <h2 style="color: #FF85A1;">🏆 榮譽排行榜</h2>
+            <div class="tab-buttons" id="level-tabs">
+                <button class="tab-btn active" onclick="updateLeaderboardUI('all')">全部</button>
+                <button class="tab-btn" onclick="updateLeaderboardUI(1)">LV 1</button>
+                <button class="tab-btn" onclick="updateLeaderboardUI(2)">LV 2</button>
+                <button class="tab-btn" onclick="updateLeaderboardUI(3)">LV 3</button>
+                <button class="tab-btn" onclick="updateLeaderboardUI(4)">LV 4</button>
+                <button class="tab-btn" onclick="updateLeaderboardUI(5)">LV 5</button>
+            </div>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>排名</th><th>名稱</th><th>LV</th><th>題數</th><th>耗時</th><th>日期</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        </tbody>
+                </table>
+            </div>
+            <button class="btn-fancy" style="margin-top: 15px; width: 180px;" onclick="showMenu()">回首頁</button>
+            <br>
+            <button class="btn-fancy" style="background: #ccc; box-shadow: 0 5px 0 #999; width: 150px; font-size: 0.8rem; padding: 5px;" onclick="clearScores()">清除所有紀錄</button>
+        </div>
     </div>
 </div>
 
@@ -191,11 +288,16 @@
     let score = 0;
     let targetNote = "";
     let gameActive = false;
+    let questionsLeft = 10;
+    let totalQuestions = 10;
+    
+    // 排行榜相關
+    let playerName = "";
+    let startTime, endTime;
 
-    const s = 30; // 線與線的間距
-    const centerY = canvas.height / 2 + 20;
+    const s = 45; 
+    const centerY = canvas.height / 2 + 50;
 
-    // 定義各等級音域
     const levels = {
         1: ["C4", "D4", "E4"],
         2: ["C4", "D4", "E4", "F4", "G4"],
@@ -209,30 +311,22 @@
         "C5": 5, "D5": 6, "E5": 7, "F5": 8, "G5": 9
     };
 
-    // 動物設定
     const animalConfig = {
         'C': 'cat.jpg', 'D': 'dog.jpg', 'E': 'elephant.jpg',
         'F': 'frog.jpg', 'G': 'giraffe.jpg', 'A': 'ape.jpg', 'B': 'bear.jpg'
     };
 
-    // 預加載圖片並處理裁切
     const animalCache = {};
     function preloadAnimals() {
         Object.keys(animalConfig).forEach(key => {
             const img = new Image();
             img.src = animalConfig[key];
             img.onload = () => {
-                // 這裡實作自動裁切邏輯：取中間正方形
                 const cropCanvas = document.createElement('canvas');
-                const size = 200;
-                cropCanvas.width = size;
-                cropCanvas.height = size;
+                cropCanvas.width = 300; cropCanvas.height = 300;
                 const cctx = cropCanvas.getContext('2d');
-                
                 const minSide = Math.min(img.width, img.height);
-                cctx.drawImage(img, 
-                    (img.width - minSide) / 2, (img.height - minSide) / 2, minSide, minSide, 
-                    0, 0, size, size);
+                cctx.drawImage(img, (img.width - minSide) / 2, (img.height - minSide) / 2, minSide, minSide, 0, 0, 300, 300);
                 animalCache[key] = cropCanvas.toDataURL();
             };
         });
@@ -241,63 +335,76 @@
     function drawStaff() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = "#D1D5DB";
-        ctx.lineWidth = 3;
-
-        // 根據 Level 決定畫幾條線 (Level 1 畫 1 條, ..., Level 5 畫 5 條)
-        // 這些線固定從最底部的那條線（第一線）開始向上畫
-        const linesToDraw = currentLevel;
-        for (let i = 0; i < linesToDraw; i++) {
+        ctx.lineWidth = 4;
+        for (let i = 0; i < currentLevel; i++) {
             let y = centerY - (i * s);
-            ctx.beginPath();
-            ctx.moveTo(100, y);
-            ctx.lineTo(900, y);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(80, y); ctx.lineTo(920, y); ctx.stroke();
         }
-
-        // 繪製 G 譜號 (僅在 Level 3 以上建議顯示，或全顯示)
-        ctx.fillStyle = "#5B5B5B";
-        ctx.font = "180px Arial";
-        ctx.fillText("𝄞", 120, centerY - s * 0.5);
-
+        ctx.fillStyle = "#5B5B5B"; ctx.font = "270px Arial";
+        ctx.fillText("𝄞", 100, centerY - s * 0.5);
         if (targetNote) renderNote();
     }
 
     function renderNote() {
         const steps = noteStepMap[targetNote]; 
-        // 這裡的 y 座標相對於第一線(E4)
         const y = centerY - (steps * (s / 2));
-        const x = canvas.width / 2;
-
-        ctx.strokeStyle = "#333";
-        ctx.fillStyle = "#333";
-        ctx.lineWidth = 4;
-
-        // 畫音符主體
+        const x = canvas.width / 2 + 50;
+        ctx.strokeStyle = "#333"; ctx.fillStyle = "#333"; ctx.lineWidth = 5;
         ctx.beginPath();
         ctx.ellipse(x, y, s * 0.7, s * 0.5, -Math.PI / 8, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
-
-        // 畫加線 (下加一線 C4)
+        ctx.fill(); ctx.stroke();
         if (targetNote === "C4") {
-            ctx.beginPath();
-            ctx.moveTo(x - 30, y);
-            ctx.lineTo(x + 30, y);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x - 45, y); ctx.lineTo(x + 45, y); ctx.stroke();
         }
+    }
+
+    // 檢查名稱並開始
+    function checkStart(lv) {
+        const nameInput = document.getElementById('playerNameInput').value.trim();
+        if (nameInput.length < 2) {
+            alert("請先輸入你的名字（至少 2 個字）！");
+            return;
+        }
+        playerName = nameInput;
+        document.getElementById('player-title').innerText = `〔${playerName}〕的認音挑戰`;
+        document.getElementById('player-title').style.display = 'block';
+        startGame(lv);
+    }
+
+    function startGame(lv) {
+        currentLevel = lv;
+        restartGame();
+    }
+
+    function restartGame() {
+        score = 0;
+        questionsLeft = 10;
+        gameActive = true;
+        startTime = new Date(); // 開始計時
+        document.getElementById('score').innerText = "0";
+        document.getElementById('current-level-display').innerText = `LV ${currentLevel}`;
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('menu-view').style.display = 'none';
+        document.getElementById('result-view').style.display = 'none';
+        document.getElementById('leaderboard-view').style.display = 'none';
+        next();
     }
 
     function handleInput(letter) {
         if (!gameActive) return;
-
         const correctLetter = targetNote.charAt(0);
         if (letter === correctLetter) {
-            score += 10;
+            score += 1;
             document.getElementById('score').innerText = score;
             showSuccess(correctLetter);
-            next();
+            questionsLeft--;
+            if (questionsLeft > 0) {
+                setTimeout(next, 800);
+            } else {
+                endTime = new Date(); // 結束計時
+                setTimeout(endSession, 800);
+            }
         } else {
-            // 答錯抖動效果
             canvas.style.transform = "translateX(10px)";
             setTimeout(() => canvas.style.transform = "translateX(0)", 100);
         }
@@ -306,48 +413,103 @@
     function showSuccess(letter) {
         fbLetter.innerText = targetNote.replace('4','').replace('5','\'');
         animalHeadImg.src = animalCache[letter] || ""; 
-        
         fbContainer.style.display = 'flex';
-        fbContainer.style.animation = 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-        
-        setTimeout(() => {
-            fbContainer.style.display = 'none';
-        }, 800);
+        setTimeout(() => { fbContainer.style.display = 'none'; }, 800);
     }
 
     function next() {
         const pool = levels[currentLevel];
-        let newNote;
-        do {
-            newNote = pool[Math.floor(Math.random() * pool.length)];
-        } while (newNote === targetNote && pool.length > 1);
-        
-        targetNote = newNote;
+        targetNote = pool[Math.floor(Math.random() * pool.length)];
+        document.getElementById('count-display').innerText = `${(totalQuestions - questionsLeft) + 1} / ${totalQuestions}`;
         drawStaff();
     }
 
-    function startGame(lv) {
-        currentLevel = lv;
-        score = 0;
-        gameActive = true;
-        document.getElementById('score').innerText = "0";
-        document.getElementById('current-level-display').innerText = `LV ${lv}`;
-        document.getElementById('overlay').style.display = 'none';
-        next();
+    function endSession() {
+        gameActive = false;
+        const duration = Math.floor((endTime - startTime) / 1000); // 算出秒數
+        
+        // 儲存資料
+        saveScore(playerName, currentLevel, score, duration);
+
+        document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('result-view').style.display = 'block';
+        document.getElementById('result-text').innerText = `你答對了 ${score} 題！`;
+        document.getElementById('time-text').innerText = `完成耗時：${duration} 秒`;
+        document.getElementById('result-title').innerText = score >= 8 ? "太棒了！🎉" : "再接再厲！💪";
     }
 
-    // 初始加載
+    // --- 排行榜儲存邏輯 ---
+    function saveScore(name, lv, score, time) {
+        const record = {
+            name: name,
+            lv: lv,
+            score: score,
+            time: time,
+            date: new Date().toLocaleString([], {month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit'})
+        };
+        let history = JSON.parse(localStorage.getItem('musicGameRank') || "[]");
+        history.push(record);
+        localStorage.setItem('musicGameRank', JSON.stringify(history));
+    }
+
+    function showLeaderboard() {
+        document.getElementById('menu-view').style.display = 'none';
+        document.getElementById('result-view').style.display = 'none';
+        document.getElementById('leaderboard-view').style.display = 'block';
+        updateLeaderboardUI('all');
+    }
+
+    function updateLeaderboardUI(filter) {
+        // 更新 Tab 樣式
+        const btns = document.querySelectorAll('.tab-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        // 簡單處理 active class 邏輯省略
+        
+        const body = document.getElementById('leaderboard-body');
+        let history = JSON.parse(localStorage.getItem('musicGameRank') || "[]");
+        
+        // 過濾
+        if (filter !== 'all') {
+            history = history.filter(item => item.lv === filter);
+        }
+
+        // 排序：1. 題數多 2. 時間短 3. 日期早
+        history.sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.time - b.time;
+        });
+
+        body.innerHTML = history.slice(0, 50).map((item, idx) => `
+            <tr>
+                <td>${idx + 1}</td>
+                <td>${item.name}</td>
+                <td>${item.lv}</td>
+                <td>${item.score}/10</td>
+                <td>${item.time}s</td>
+                <td>${item.date}</td>
+            </tr>
+        `).join('');
+        
+        if (history.length === 0) body.innerHTML = '<tr><td colspan="6">尚無紀錄</td></tr>';
+    }
+
+    function clearScores() {
+        if (confirm("確定要清除所有排行榜紀錄嗎？")) {
+            localStorage.removeItem('musicGameRank');
+            updateLeaderboardUI('all');
+        }
+    }
+
+    function showMenu() {
+        document.getElementById('result-view').style.display = 'none';
+        document.getElementById('leaderboard-view').style.display = 'none';
+        document.getElementById('menu-view').style.display = 'block';
+        document.getElementById('player-title').style.display = 'none';
+    }
+
     preloadAnimals();
     drawStaff();
-
 </script>
-
-<style>
-    @keyframes popIn {
-        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    }
-</style>
 
 </body>
 </html>
