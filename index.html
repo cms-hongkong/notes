@@ -11,8 +11,6 @@
             --wood-brown: #604439;
             --sand-light: #F8F4E3;
             --text-serif: "Times New Roman", "SimSun", "PMingLiU", serif;
-            --correct-green: #90EE90;
-            --wrong-red: #FFB3B3;
         }
 
         body {
@@ -61,6 +59,7 @@
             border: 2px solid var(--wood-brown);
         }
 
+        /* 綠框放大 3% */
         #canvas-wrapper {
             background: white;
             border-radius: 25px;
@@ -101,26 +100,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
-        }
-
-        /* 答錯抖動動畫 */
-        .shake-btn { animation: shakeEffect 0.3s ease-in-out 0s 1; }
-        @keyframes shakeEffect { 
-            0%, 100% { transform: translateX(0); } 
-            25% { transform: translateX(-3px); } 
-            75% { transform: translateX(3px); } 
-        }
-
-        /* 答對/答錯符號樣式 */
-        .feedback-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 4rem;
-            pointer-events: none;
-            z-index: 10;
         }
 
         .animal-btn:active {
@@ -136,10 +115,32 @@
         }
 
         .letter-name {
-            font-size: 3rem; 
+            font-size: 3rem;
             font-weight: bold;
             color: var(--wood-brown);
             font-family: var(--text-serif);
+        }
+
+        /* 答錯抖動動畫 */
+        @keyframes shakeEffect {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            50% { transform: translateX(4px); }
+            75% { transform: translateX(-2px); }
+            100% { transform: translateX(0); }
+        }
+        .shake-btn {
+            animation: shakeEffect 0.3s ease-in-out 0s 1;
+        }
+
+        /* 答對綠色閃爍動畫（可選） */
+        @keyframes correctFlash {
+            0% { background-color: #FFF; }
+            50% { background-color: #90EE90; }
+            100% { background-color: #FFF; }
+        }
+        .correct-flash {
+            animation: correctFlash 0.4s ease-in-out 0s 1;
         }
 
         #overlay {
@@ -291,9 +292,10 @@
     let lastTargetNote = "";
     let questionsLeft = 10;
     let startTime, endTime;
+    let isAnswering = false;  // 防止連點
 
-    const s = 91; 
-    const clefDownTotal = 90; 
+    const s = 91;
+    const clefDownTotal = 90;
 
     const notesMap = {
         1: ["C4", "D4", "E4"],
@@ -348,9 +350,44 @@
         }
     }
 
+    // 答對效果：綠色背景 + ✔️
+    function showCorrectEffect(btn, letterSpan) {
+        // 儲存原始背景顏色
+        const originalBg = btn.style.backgroundColor || "#FFF";
+        btn.style.backgroundColor = "#90EE90";
+        if (letterSpan) letterSpan.textContent = "✔️ " + btn.querySelector('.letter-name')?.innerText?.replace(/[✔️❌]/g, '') || "✔️";
+        
+        setTimeout(() => {
+            btn.style.backgroundColor = "#FFF";
+            if (letterSpan && letterSpan.textContent) {
+                const cleanText = letterSpan.textContent.replace(/[✔️❌]/g, '');
+                letterSpan.textContent = cleanText;
+            }
+        }, 400);
+    }
+
+    // 答錯效果：紅色背景 + 抖動 + ❌
+    function showWrongEffect(btn, letterSpan) {
+        const originalBg = btn.style.backgroundColor || "#FFF";
+        btn.style.backgroundColor = "#FFB3B3";
+        btn.classList.add('shake-btn');
+        if (letterSpan) letterSpan.textContent = "❌ " + btn.querySelector('.letter-name')?.innerText?.replace(/[✔️❌]/g, '') || "❌";
+        
+        setTimeout(() => {
+            btn.style.backgroundColor = "#FFF";
+            btn.classList.remove('shake-btn');
+            if (letterSpan && letterSpan.textContent) {
+                const cleanText = letterSpan.textContent.replace(/[✔️❌]/g, '');
+                letterSpan.textContent = cleanText;
+            }
+        }, 400);
+    }
+
     function startGame(lv) {
         curLv = lv;
-        score = 0; questionsLeft = 10;
+        score = 0;
+        questionsLeft = 10;
+        isAnswering = false;
         startTime = new Date();
         document.getElementById('score-val').innerText = "0";
         document.getElementById('lv-display').innerText = `LV ${curLv}`;
@@ -359,6 +396,7 @@
     }
 
     function nextQuestion() {
+        isAnswering = false;
         const pool = notesMap[curLv];
         let nextNote;
         do {
@@ -386,51 +424,43 @@
         choices.forEach(letter => {
             const btn = document.createElement('button');
             btn.className = 'animal-btn';
+            
+            // 建立內部結構以便修改顯示文字
+            const img = document.createElement('img');
+            img.src = animalImgs[letter];
+            img.className = 'animal-img';
+            img.onerror = function() { this.src = `https://via.placeholder.com/90?text=${letter}`; };
+            const letterDiv = document.createElement('div');
+            letterDiv.className = 'letter-name';
+            letterDiv.textContent = letter;
+            btn.appendChild(img);
+            btn.appendChild(letterDiv);
+            
             btn.onclick = () => {
-                /* 答對視覺效果 */
-                if (letter === targetNote.charAt(0)) {
-                    btn.style.backgroundColor = 'var(--correct-green)';
-                    const icon = document.createElement('span');
-                    icon.className = 'feedback-icon';
-                    icon.innerText = '✔️';
-                    btn.appendChild(icon);
-
+                if (isAnswering) return;  // 防止連點
+                isAnswering = true;
+                
+                const isCorrect = (letter === targetNote.charAt(0));
+                const letterSpan = btn.querySelector('.letter-name');
+                
+                if (isCorrect) {
+                    // 答對：綠色效果 + 增加分數
+                    showCorrectEffect(btn, letterSpan);
                     score++;
                     document.getElementById('score-val').innerText = score;
-
-                    setTimeout(() => {
-                        btn.style.backgroundColor = '#FFF';
-                        if(btn.contains(icon)) btn.removeChild(icon);
-                    }, 400);
-                } 
-                /* 答錯視覺效果 */
-                else {
-                    btn.style.backgroundColor = 'var(--wrong-red)';
-                    btn.classList.add('shake-btn');
-                    const icon = document.createElement('span');
-                    icon.className = 'feedback-icon';
-                    icon.innerText = '❌';
-                    btn.appendChild(icon);
-
-                    setTimeout(() => {
-                        btn.style.backgroundColor = '#FFF';
-                        btn.classList.remove('shake-btn');
-                        if(btn.contains(icon)) btn.removeChild(icon);
-                    }, 400);
+                } else {
+                    // 答錯：紅色效果 + 抖動，不扣分
+                    showWrongEffect(btn, letterSpan);
+                    // 不加分數
                 }
-
+                
                 questionsLeft--;
                 if (questionsLeft > 0) {
-                    // 立即呼叫下一個問題，視覺效果會在背景由 setTimeout 處理
-                    nextQuestion(); 
+                    setTimeout(() => { nextQuestion(); }, 400); // 等效果結束再換題
                 } else {
-                    showResult();
+                    setTimeout(() => { showResult(); }, 400);
                 }
             };
-            btn.innerHTML = `
-                <img src="${animalImgs[letter]}" class="animal-img" onerror="this.src='https://via.placeholder.com/90?text=${letter}'">
-                <div class="letter-name">${letter}</div>
-            `;
             area.appendChild(btn);
         });
     }
@@ -482,7 +512,14 @@
         data.sort((a, b) => (b.score - a.score) || (a.time - b.time));
         const body = document.getElementById('rank-body');
         body.innerHTML = data.slice(0, 15).map((d, i) => `
-            <tr><td>${i+1}</td><td>${d.name}</td><td>${d.lv}</td><td>${d.score}</td><td>${d.time}s</td><td>${d.date}</td></tr>
+            <tr>
+                <td>${i+1}</td>
+                <td>${d.name}</td>
+                <td>${d.lv}</td>
+                <td>${d.score}</td>
+                <td>${d.time}s</td>
+                <td>${d.date}</td>
+            </tr>
         `).join('') || '<tr><td colspan="6">尚未有紀錄</td></tr>';
     }
 
