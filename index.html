@@ -59,24 +59,23 @@
             border: 2px solid var(--wood-brown);
         }
 
-        /* --- 修改點 1：綠框放大 3% --- */
+        /* 綠框放大 3% 效果 */
         #canvas-wrapper {
             background: white;
             border-radius: 25px;
-            border: 6px solid var(--leaf-green); /* 稍微加厚邊框增加存在感 */
+            border: 6px solid var(--leaf-green);
             margin: 15px auto;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 透過 padding 與 width 讓容器感官上放大 3% */
             width: 98%; 
             padding: 12px; 
             box-sizing: border-box;
         }
 
         canvas {
-            width: 100%; /* 題目在框內自適應，但受限於原繪圖比例 */
+            width: 100%;
             height: auto;
             display: block;
         }
@@ -116,7 +115,7 @@
         }
 
         .letter-name {
-            font-size: 3rem; /* 字母放大 50% */
+            font-size: 3rem; /* 字母字體放大 50% */
             font-weight: bold;
             color: var(--wood-brown);
             font-family: var(--text-serif);
@@ -162,7 +161,7 @@
             margin: 15px 0;
         }
 
-        /* 排行榜垂直版面 */
+        /* 排行榜垂直排列佈局 */
         #rank-view {
             display: flex;
             flex-direction: column;
@@ -216,7 +215,7 @@
     <div id="overlay">
         <div id="menu-view">
             <h1 style="font-size: 3rem; margin-bottom: 20px;">CMS認音大挑戰</h1>
-            <p style="color: var(--wood-brown); font-weight: bold; font-size: 1.2rem;">挑戰開始！請選擇等級：</p>
+            <p style="color: var(--wood-brown); font-weight: bold; font-size: 1.2rem;">歡迎挑戰！請選擇等級：</p>
             <div style="display: flex; flex-wrap: wrap; justify-content: center; max-width: 700px;">
                 <button class="btn-forest" onclick="startGame(1)">Level 1 (C, D, E)</button>
                 <button class="btn-forest" onclick="startGame(2)">Level 2 (C - G)</button>
@@ -273,9 +272,9 @@
     let questionsLeft = 10;
     let startTime, endTime;
 
-    // --- 保留設定參數 ---
-    const s = 94; // 線距增加 10
-    const clefDownTotal = 90; // 高音譜號下移量
+    // --- 修改點 2：線距減少 3 (94 -> 91) ---
+    const s = 91; 
+    const clefDownTotal = 90; // 高音譜號下移量 (已保留 15px 的調整)
 
     const notesMap = {
         1: ["C4", "D4", "E4"],
@@ -298,7 +297,7 @@
     function drawScene() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // 題目垂直置中計算
+        // 題目置中於綠框區域
         const staffHeight = (curLv - 1) * s;
         const baseLineY = (canvas.height + staffHeight) / 2;
 
@@ -311,7 +310,7 @@
             ctx.beginPath(); ctx.moveTo(100, y); ctx.lineTo(900, y); ctx.stroke();
         }
 
-        // 高音譜號 (放大 20% + 下移 90px)
+        // 高音譜號 (維持放大 20% + 下移設定)
         ctx.fillStyle = "#111"; 
         ctx.font = `${s * 8.6}px serif`; 
         ctx.fillText("𝄞", 110, (baseLineY - s * 0.4) + clefDownTotal);
@@ -323,8 +322,9 @@
 
             ctx.fillStyle = "black";
             ctx.beginPath();
-            // 音符大小隨寬線距比例適配
-            ctx.ellipse(x, y, s * 0.74, s * 0.53, -Math.PI / 8, 0, 2 * Math.PI);
+            // --- 修改點 1：音符縮小 10% ---
+            // 原比例約 s * 0.74, 縮小 10% 後約為 s * 0.666
+            ctx.ellipse(x, y, s * 0.666, s * 0.477, -Math.PI / 8, 0, 2 * Math.PI);
             ctx.fill();
 
             if (targetNote === "C4") {
@@ -346,7 +346,6 @@
     function nextQuestion() {
         const pool = notesMap[curLv];
         let nextNote;
-        // 不連續出現同一道題目
         do {
             nextNote = pool[Math.floor(Math.random() * pool.length)];
         } while (nextNote === lastTargetNote && pool.length > 1);
@@ -365,7 +364,6 @@
         let others = pool.filter(l => l !== correctLetter).sort(() => Math.random() - 0.5);
         
         while (choices.length < 3 && others.length > 0) choices.push(others.pop());
-        // 選項隨機排列
         choices.sort(() => Math.random() - 0.5);
 
         const area = document.getElementById('answer-area');
