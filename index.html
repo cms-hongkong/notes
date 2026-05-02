@@ -59,7 +59,7 @@
             border: 2px solid var(--wood-brown);
         }
 
-        /* 置中題目區域的綠框 */
+        /* 題目區域綠框 */
         #canvas-wrapper {
             background: white;
             border-radius: 20px;
@@ -111,7 +111,8 @@
         }
 
         .letter-name {
-            font-size: 3rem; /* 已放大 50% */
+            /* 已經放大 50% 的尺寸 */
+            font-size: 3rem; 
             font-weight: bold;
             color: var(--wood-brown);
             font-family: var(--text-serif);
@@ -160,7 +161,7 @@
             width: 280px;
         }
 
-        /* 排行榜版面調整：垂直排列 */
+        /* 排行榜垂直版面 */
         #rank-view {
             display: flex;
             flex-direction: column;
@@ -173,7 +174,7 @@
         .rank-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         .rank-table th { background: var(--leaf-green); padding: 12px; color: white; }
         .rank-table td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
@@ -189,7 +190,7 @@
         .tab-btn {
             font-family: var(--text-serif);
             padding: 8px 15px; border-radius: 12px; border: 2px solid var(--forest-green);
-            background: white; cursor: pointer; font-weight: bold;
+            background: white; cursor: pointer; margin: 0 2px; font-weight: bold;
         }
         .tab-btn.active { background: var(--forest-green); color: white; }
     </style>
@@ -214,7 +215,7 @@
     <div id="overlay">
         <div id="menu-view">
             <h1 style="font-size: 3rem; margin-bottom: 20px;">CMS認音大挑戰</h1>
-            <p style="color: var(--wood-brown); font-weight: bold; font-size: 1.2rem;">請選擇等級開始挑戰：</p>
+            <p style="color: var(--wood-brown); font-weight: bold; font-size: 1.2rem;">歡迎！請選擇等級開始挑戰：</p>
             <div style="display: flex; flex-wrap: wrap; justify-content: center; max-width: 700px;">
                 <button class="btn-forest" onclick="startGame(1)">Level 1 (C, D, E)</button>
                 <button class="btn-forest" onclick="startGame(2)">Level 2 (C - G)</button>
@@ -231,8 +232,8 @@
             <p id="time-text" style="color: var(--wood-brown); font-weight: bold; font-size: 1.3rem;"></p>
             
             <div class="input-group">
-                <p style="margin-bottom: 10px;">想在排行榜記錄你的成績嗎？</p>
-                <input type="text" id="playerNameInput" placeholder="請輸入你的名字（選填）" maxlength="10">
+                <p style="margin-bottom: 10px;">請輸入名字記錄成績（選填）：</p>
+                <input type="text" id="playerNameInput" placeholder="你的名字..." maxlength="10">
             </div>
 
             <button class="btn-forest" onclick="submitAndRestart()">記錄並再玩一次</button>
@@ -271,10 +272,10 @@
     let questionsLeft = 10;
     let startTime, endTime;
 
-    // --- 修改點 2: 線距再增加 3 (76 -> 79) ---
-    const s = 79; 
-    // --- 修改點 3: 高音譜號再下移 10px (45 -> 55) ---
-    const clefDownTotal = 55; 
+    // --- 修改點 2: 線距再增加 5 (79 -> 84) ---
+    const s = 84; 
+    // --- 修改點 1: 高音譜號再下移 20px (55 -> 75) ---
+    const clefDownTotal = 75; 
 
     const notesMap = {
         1: ["C4", "D4", "E4"],
@@ -297,21 +298,23 @@
     function drawScene() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // --- 垂直置中五線譜 ---
+        // 題目置中算法
         const staffHeight = (curLv - 1) * s;
         const baseLineY = (canvas.height + staffHeight) / 2;
 
         ctx.strokeStyle = "#333";
         ctx.lineWidth = 5;
         
+        // 畫五線譜
         for (let i = 0; i < curLv; i++) {
             let y = baseLineY - (i * s);
             ctx.beginPath(); ctx.moveTo(100, y); ctx.lineTo(900, y); ctx.stroke();
         }
 
-        // --- 修改點 3: 高音譜號放大 20% (由 6.9 提高至約 8.3) 且下移 ---
+        // 高音譜號 (放大 20% + 下移 75px)
         ctx.fillStyle = "#111"; 
-        ctx.font = `${s * 8.3}px serif`; 
+        // 放大 20% 相較於原始比例
+        ctx.font = `${s * 8.5}px serif`; 
         ctx.fillText("𝄞", 110, (baseLineY - s * 0.4) + clefDownTotal);
 
         if (targetNote) {
@@ -321,7 +324,7 @@
 
             ctx.fillStyle = "black";
             ctx.beginPath();
-            // 音符大小隨線距適配
+            // 音符隨線距比例放大
             ctx.ellipse(x, y, s * 0.74, s * 0.53, -Math.PI / 8, 0, 2 * Math.PI);
             ctx.fill();
 
@@ -393,8 +396,8 @@
         document.getElementById('rank-view').style.display = 'none';
         document.getElementById('result-view').style.display = 'block';
         
-        document.getElementById('result-text').innerText = `本局得分：${score} / 10`;
-        document.getElementById('time-text').innerText = `完成耗時：${duration} 秒`;
+        document.getElementById('result-text').innerText = `獲得分數：${score} / 10`;
+        document.getElementById('time-text').innerText = `耗時：${duration} 秒`;
     }
 
     function saveRecord() {
@@ -433,7 +436,7 @@
         const body = document.getElementById('rank-body');
         body.innerHTML = data.slice(0, 15).map((d, i) => `
             <tr><td>${i+1}</td><td>${d.name}</td><td>${d.lv}</td><td>${d.score}</td><td>${d.time}s</td><td>${d.date}</td></tr>
-        `).join('') || '<tr><td colspan="6">尚未有紀錄</td></tr>';
+        `).join('') || '<tr><td colspan="6">尚無紀錄</td></tr>';
     }
 
     function goHome() {
