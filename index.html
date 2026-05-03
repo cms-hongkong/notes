@@ -59,7 +59,6 @@
             border: 2px solid var(--wood-brown);
         }
 
-        /* 綠框放大 3% */
         #canvas-wrapper {
             background: white;
             border-radius: 25px;
@@ -121,7 +120,6 @@
             font-family: var(--text-serif);
         }
 
-        /* 答錯抖動動畫 */
         @keyframes shakeEffect {
             0% { transform: translateX(0); }
             25% { transform: translateX(-4px); }
@@ -133,7 +131,6 @@
             animation: shakeEffect 0.3s ease-in-out 0s 1;
         }
 
-        /* 答對綠色閃爍動畫（可選） */
         @keyframes correctFlash {
             0% { background-color: #FFF; }
             50% { background-color: #90EE90; }
@@ -292,7 +289,7 @@
     let lastTargetNote = "";
     let questionsLeft = 10;
     let startTime, endTime;
-    let isAnswering = false;  // 防止連點
+    let isAnswering = false;
 
     const s = 91;
     const clefDownTotal = 90;
@@ -322,14 +319,31 @@
         const fixedStaffHeight = (fixedMaxLines - 1) * s;
         const baseLineY = (canvas.height + fixedStaffHeight) / 2;
 
-        ctx.strokeStyle = "#333";
-        ctx.lineWidth = 5;
-        
+        /* 線條顏色由下而上：最下面紅色、橙色、黃色、綠色、最上面紫色（無編號數字） */
+        const lineColors = {
+            1: "#FF0000",  // 紅色（最下面）
+            2: "#FFA500",  // 橙色
+            3: "#FFD700",  // 金黃色
+            4: "#008000",  // 綠色
+            5: "#800080"   // 紫色（最上面）
+        };
+
         for (let i = 0; i < curLv; i++) {
             let y = baseLineY - (i * s);
-            ctx.beginPath(); ctx.moveTo(100, y); ctx.lineTo(900, y); ctx.stroke();
+            
+            // i=0 是目前最上面的線，i=curLv-1 是目前最下面的線
+            // 因此由下而上的編號為：
+            const lineNumberFromBottom = curLv - i;
+            
+            ctx.strokeStyle = lineColors[lineNumberFromBottom];
+            ctx.lineWidth = 5;
+            ctx.beginPath(); 
+            ctx.moveTo(100, y); 
+            ctx.lineTo(900, y); 
+            ctx.stroke();
         }
 
+        // 恢復黑色繪製高音譜號
         ctx.fillStyle = "#111"; 
         ctx.font = `${s * 8.6}px serif`; 
         ctx.fillText("𝄞", 110, (baseLineY - s * 0.4) + clefDownTotal);
@@ -345,15 +359,14 @@
             ctx.fill();
 
             if (targetNote === "C4") {
+                ctx.strokeStyle = "#333"; // 加線使用深灰色
+                ctx.lineWidth = 5;
                 ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x + s, y); ctx.stroke();
             }
         }
     }
 
-    // 答對效果：綠色背景 + ✔️
     function showCorrectEffect(btn, letterSpan) {
-        // 儲存原始背景顏色
-        const originalBg = btn.style.backgroundColor || "#FFF";
         btn.style.backgroundColor = "#90EE90";
         if (letterSpan) letterSpan.textContent = "✔️ " + btn.querySelector('.letter-name')?.innerText?.replace(/[✔️❌]/g, '') || "✔️";
         
@@ -366,9 +379,7 @@
         }, 400);
     }
 
-    // 答錯效果：紅色背景 + 抖動 + ❌
     function showWrongEffect(btn, letterSpan) {
-        const originalBg = btn.style.backgroundColor || "#FFF";
         btn.style.backgroundColor = "#FFB3B3";
         btn.classList.add('shake-btn');
         if (letterSpan) letterSpan.textContent = "❌ " + btn.querySelector('.letter-name')?.innerText?.replace(/[✔️❌]/g, '') || "❌";
@@ -425,7 +436,6 @@
             const btn = document.createElement('button');
             btn.className = 'animal-btn';
             
-            // 建立內部結構以便修改顯示文字
             const img = document.createElement('img');
             img.src = animalImgs[letter];
             img.className = 'animal-img';
@@ -437,26 +447,23 @@
             btn.appendChild(letterDiv);
             
             btn.onclick = () => {
-                if (isAnswering) return;  // 防止連點
+                if (isAnswering) return;
                 isAnswering = true;
                 
                 const isCorrect = (letter === targetNote.charAt(0));
                 const letterSpan = btn.querySelector('.letter-name');
                 
                 if (isCorrect) {
-                    // 答對：綠色效果 + 增加分數
                     showCorrectEffect(btn, letterSpan);
                     score++;
                     document.getElementById('score-val').innerText = score;
                 } else {
-                    // 答錯：紅色效果 + 抖動，不扣分
                     showWrongEffect(btn, letterSpan);
-                    // 不加分數
                 }
                 
                 questionsLeft--;
                 if (questionsLeft > 0) {
-                    setTimeout(() => { nextQuestion(); }, 400); // 等效果結束再換題
+                    setTimeout(() => { nextQuestion(); }, 400);
                 } else {
                     setTimeout(() => { showResult(); }, 400);
                 }
