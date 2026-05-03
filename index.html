@@ -44,7 +44,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
-            visibility: hidden; /* 遊戲開始前隱藏 */
+            visibility: hidden;
         }
 
         .badge {
@@ -76,7 +76,6 @@
             min-height: 180px;
         }
 
-        /* 按鈕樣式 */
         .animal-btn {
             background: #FFF;
             border: 4px solid var(--wood-brown);
@@ -97,7 +96,6 @@
         .animal-img { width: 100%; height: 100%; object-fit: contain; }
         .letter-name { font-size: 2.5rem; font-weight: bold; color: var(--wood-brown); }
 
-        /* Overlay 視窗控制 */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -126,15 +124,29 @@
             width: 280px;
         }
 
-        .btn-mode { background: #2D6A4F; font-size: 1.6rem; height: 100px; }
+        /* 排行榜視圖：垂直置中關鍵 CSS */
+        #rank-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%; /* 撐滿父容器以置中 */
+        }
 
-        input#playerNameInput {
-            padding: 12px; font-size: 1.2rem; border-radius: 50px; border: 3px solid var(--leaf-green); text-align: center; width: 250px; margin: 10px;
+        .rank-table-container {
+            width: 90%;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 20px;
+            border: 3px solid var(--leaf-green);
+            margin: 20px 0;
         }
 
         .rank-table { width: 100%; border-collapse: collapse; }
-        .rank-table th { background: var(--leaf-green); color: white; padding: 10px; }
-        .rank-table td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; }
+        .rank-table th { background: var(--leaf-green); color: white; padding: 12px; position: sticky; top: 0; }
+        .rank-table td { padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; }
 
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
         .shake-btn { animation: shake 0.3s; }
@@ -158,38 +170,37 @@
     <div id="answer-area"></div>
 
     <div id="overlay">
-        <div id="mode-view">
-            <h1 style="font-size: 3rem;">請選擇譜號</h1>
-            <button class="btn-forest btn-mode" onclick="selectMode('treble')">𝄞 高音譜號</button>
-            <button class="btn-forest btn-mode" onclick="selectMode('bass')">𝄢 低音譜號</button>
-            <br>
-            <button class="btn-forest" style="background: var(--wood-brown); width: 200px;" onclick="showRank()">🏆 排行榜</button>
+        <div id="mode-view" style="display: flex; flex-direction: column; align-items: center;">
+            <h1 style="font-size: 3rem; margin-bottom: 20px;">請選擇譜號</h1>
+            <button class="btn-forest" style="height: 80px; font-size: 1.8rem;" onclick="selectMode('treble')">𝄞 高音譜號</button>
+            <button class="btn-forest" style="height: 80px; font-size: 1.8rem;" onclick="selectMode('bass')">𝄢 低音譜號</button>
+            <button class="btn-forest" style="background: var(--wood-brown); width: 220px; margin-top: 30px;" onclick="showRank()">🏆 高手排行榜</button>
         </div>
 
         <div id="level-view" style="display: none;">
-            <h2 id="level-title" style="font-size: 2rem;">選擇等級</h2>
+            <h2 id="level-title" style="font-size: 2.2rem; margin-bottom: 20px;">選擇等級</h2>
             <div id="level-buttons" style="display: flex; flex-wrap: wrap; justify-content: center; max-width: 700px;"></div>
-            <button class="btn-forest" style="background: #999; margin-top: 20px;" onclick="goBackToMode()">返回模式選擇</button>
+            <button class="btn-forest" style="background: #999; margin-top: 25px; width: 200px;" onclick="goBackToMode()">返回</button>
         </div>
 
         <div id="result-view" style="display: none;">
-            <h2 style="font-size: 3rem;">太利害啦！</h2>
-            <p id="result-text" style="font-size: 1.5rem;"></p>
-            <p id="time-text" style="color: var(--wood-brown); font-weight: bold;"></p>
-            <input type="text" id="playerNameInput" placeholder="輸入名字..." maxlength="10">
+            <h2 style="font-size: 3rem; color: var(--forest-green);">太利害啦！</h2>
+            <p id="result-text" style="font-size: 1.8rem; margin: 10px 0;"></p>
+            <p id="time-text" style="font-size: 1.2rem; color: var(--wood-brown); margin-bottom: 20px;"></p>
+            <input type="text" id="playerNameInput" placeholder="你的名字..." maxlength="10">
             <button class="btn-forest" onclick="submitAndRestart()">再玩一次</button>
             <button class="btn-forest" style="background: var(--leaf-green); color: var(--forest-green);" onclick="submitAndGoHome()">回首頁</button>
         </div>
 
-        <div id="rank-view" style="display: none; width: 95%;">
-            <h2>🏆 高手排行榜</h2>
-            <div style="max-height: 300px; overflow-y: auto; background: white; border-radius: 15px; margin-bottom: 15px;">
+        <div id="rank-view">
+            <h1 style="margin: 0;">🏆 高手排行榜</h1>
+            <div class="rank-table-container">
                 <table class="rank-table">
-                    <thead><tr><th>排名</th><th>名稱</th><th>類型</th><th>LV</th><th>分數</th><th>時間</th></tr></thead>
+                    <thead><tr><th>排名</th><th>名稱</th><th>譜號</th><th>LV</th><th>分數</th><th>耗時</th></tr></thead>
                     <tbody id="rank-body"></tbody>
                 </table>
             </div>
-            <button class="btn-forest" onclick="goBackToMode()">返回</button>
+            <button class="btn-forest" style="width: 200px;" onclick="goBackToMode()">返回主選單</button>
         </div>
     </div>
 </div>
@@ -198,7 +209,7 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    let currentMode = 'treble'; // 'treble' or 'bass'
+    let currentMode = 'treble';
     let curLv = 1;
     let score = 0;
     let targetNote = "";
@@ -209,19 +220,17 @@
 
     const s = 91; 
 
-    // 遊戲數據定義
     const config = {
         treble: {
             clef: "𝄞",
-            symbolOffset: 90,
+            symbolOffset: 80, // 原本 90, 減 10 變為移高 10px
             fontSizeMult: 8.6,
-            rankKey: "cmsNoteRankTreble",
             levels: [
-                { name: "Level 1 (C, D, E)", notes: ["C4", "D4", "E4"] },
-                { name: "Level 2 (C - G)", notes: ["C4", "D4", "E4", "F4", "G4"] },
-                { name: "Level 3 (C - B)", notes: ["C4", "D4", "E4", "F4", "G4", "A4", "B4"] },
-                { name: "Level 4 (C - D')", notes: ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5"] },
-                { name: "Level 5 (C - G')", notes: ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5", "E5", "F5", "G5"] }
+                { notes: ["C4", "D4", "E4"] },
+                { notes: ["C4", "D4", "E4", "F4", "G4"] },
+                { notes: ["C4", "D4", "E4", "F4", "G4", "A4", "B4"] },
+                { notes: ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5"] },
+                { notes: ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5", "E5", "F5", "G5"] }
             ],
             steps: { "C4": -2, "D4": -1, "E4": 0, "F4": 1, "G4": 2, "A4": 3, "B4": 4, "C5": 5, "D5": 6, "E5": 7, "F5": 8, "G5": 9 }
         },
@@ -229,61 +238,46 @@
             clef: "𝄢",
             symbolOffset: 95,
             fontSizeMult: 6.075,
-            rankKey: "cmsNoteRankBass",
             levels: [
-                { name: "Level 1 (C, B, A)", notes: ["C4", "B3", "A3"] },
-                { name: "Level 2 (C - F)", notes: ["C4", "B3", "A3", "G3", "F3"] },
-                { name: "Level 3 (C - D)", notes: ["C4", "B3", "A3", "G3", "F3", "E3", "D3"] },
-                { name: "Level 4 (C - 低音B)", notes: ["C4", "B3", "A3", "G3", "F3", "E3", "D3", "C3", "B2"] },
-                { name: "Level 5 (C - 低音E)", notes: ["C4", "B3", "A3", "G3", "F3", "E3", "D3", "C3", "B2", "A2", "G2", "F2", "E2"] }
+                { notes: ["C4", "B3", "A3"] },
+                { notes: ["C4", "B3", "A3", "G3", "F3"] },
+                { notes: ["C4", "B3", "A3", "G3", "F3", "E3", "D3"] },
+                { notes: ["C4", "B3", "A3", "G3", "F3", "E3", "D3", "C3", "B2"] },
+                { notes: ["C4", "B3", "A3", "G3", "F3", "E3", "D3", "C3", "B2", "A2", "G2", "F2", "E2"] }
             ],
             steps: { "C4": -2, "B3": -1, "A3": 0, "G3": 1, "F3": 2, "E3": 3, "D3": 4, "C3": 5, "B2": 6, "A2": 7, "G2": 8, "F2": 9, "E2": 10 }
         }
     };
 
     const animalData = {
-        'C': { img: 'cat-h.PNG', emoji: '🐱' },
-        'D': { img: 'dog-h.PNG', emoji: '🐶' },
-        'E': { img: 'elephant-h.PNG', emoji: '🐘' },
-        'F': { img: 'frog-h.PNG', emoji: '🐸' },
-        'G': { img: 'giraffe-h.PNG', emoji: '🦒' },
-        'A': { img: 'ape-h.PNG', emoji: '🦧' },
+        'C': { img: 'cat-h.PNG', emoji: '🐱' }, 'D': { img: 'dog-h.PNG', emoji: '🐶' },
+        'E': { img: 'elephant-h.PNG', emoji: '🐘' }, 'F': { img: 'frog-h.PNG', emoji: '🐸' },
+        'G': { img: 'giraffe-h.PNG', emoji: '🦒' }, 'A': { img: 'ape-h.PNG', emoji: '🦧' },
         'B': { img: 'bear-h.PNG', emoji: '🐻' }
     };
 
-    // 視窗切換邏輯
     function selectMode(mode) {
         currentMode = mode;
         document.getElementById('mode-view').style.display = 'none';
-        document.getElementById('level-view').style.display = 'block';
+        document.getElementById('rank-view').style.display = 'none';
+        document.getElementById('level-view').style.display = 'flex';
         document.getElementById('level-title').innerText = mode === 'treble' ? "高音譜號 - 選擇等級" : "低音譜號 - 選擇等級";
         
         const btnContainer = document.getElementById('level-buttons');
         btnContainer.innerHTML = '';
-        config[currentMode].levels.forEach((lv, index) => {
+        const labels = ["Level 1", "Level 2", "Level 3", "Level 4", "Level 5"];
+        labels.forEach((label, index) => {
             const btn = document.createElement('button');
             btn.className = 'btn-forest';
-            btn.innerText = lv.name;
+            btn.innerText = label;
             btn.onclick = () => startGame(index + 1);
             btnContainer.appendChild(btn);
         });
         drawScene();
     }
 
-    function goBackToMode() {
-        document.getElementById('level-view').style.display = 'none';
-        document.getElementById('rank-view').style.display = 'none';
-        document.getElementById('mode-view').style.display = 'flex';
-        document.getElementById('stats-bar').style.visibility = 'hidden';
-        targetNote = "";
-        drawScene();
-    }
-
-    // 遊戲核心邏輯
     function startGame(lv) {
-        curLv = lv;
-        score = 0;
-        questionsLeft = 10;
+        curLv = lv; score = 0; questionsLeft = 10;
         startTime = new Date();
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('stats-bar').style.visibility = 'visible';
@@ -292,62 +286,53 @@
         nextQuestion();
     }
 
-    function nextQuestion() {
-        isAnswering = false;
-        const pool = config[currentMode].levels[curLv-1].notes;
-        do {
-            targetNote = pool[Math.floor(Math.random() * pool.length)];
-        } while (targetNote === lastTargetNote && pool.length > 1);
-        lastTargetNote = targetNote;
-        
-        document.getElementById('count-display').innerText = `${11 - questionsLeft} / 10`;
-        drawScene();
-        generateChoices();
-    }
-
     function drawScene() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const modeConf = config[currentMode];
         const colors = ["#FF0000", "#FFA500", "#FFD700", "#008000", "#800080"];
         
-        // 繪製五線譜 (固定 5 條線)
+        // 核心修改：根據 curLv 決定繪製線條的數量
         const staffStartY = currentMode === 'treble' ? canvas.height/2 + 2*s : canvas.height/2 - 2*s;
         
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < curLv; i++) { // 只循環到 curLv
             const y = currentMode === 'treble' ? staffStartY - (i * s) : staffStartY + (i * s);
-            ctx.strokeStyle = colors[i] || "#333";
+            ctx.strokeStyle = colors[i];
             ctx.lineWidth = 5;
             ctx.beginPath();
             ctx.moveTo(100, y); ctx.lineTo(900, y);
             ctx.stroke();
         }
 
-        // 譜號
+        // 譜號位置調整
         ctx.fillStyle = "#111";
         ctx.font = `${s * modeConf.fontSizeMult}px serif`;
-        const clefX = 110;
         const clefY = currentMode === 'treble' ? staffStartY + modeConf.symbolOffset : staffStartY + 3*s + modeConf.symbolOffset;
-        ctx.fillText(modeConf.clef, clefX, clefY);
+        ctx.fillText(modeConf.clef, 110, clefY);
 
-        // 音符
         if (targetNote) {
             const steps = modeConf.steps[targetNote];
-            const baseY = currentMode === 'treble' ? staffStartY : staffStartY;
-            const y = currentMode === 'treble' ? baseY - (steps * (s/2)) : baseY + (steps * (s/2));
+            const y = currentMode === 'treble' ? staffStartY - (steps * (s/2)) : staffStartY + (steps * (s/2));
             const x = canvas.width / 2 + 100;
-
             ctx.fillStyle = "black";
             ctx.beginPath();
             ctx.ellipse(x, y, s * 0.66, s * 0.47, -Math.PI / 8, 0, 2 * Math.PI);
             ctx.fill();
-
-            // 加線
             if (steps <= -2 || steps >= 10) {
-                ctx.strokeStyle = "#333";
-                ctx.lineWidth = 5;
+                ctx.strokeStyle = "#333"; ctx.lineWidth = 5;
                 ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x + s, y); ctx.stroke();
             }
         }
+    }
+
+    // 其他遊戲逻辑保持不变...
+    function nextQuestion() {
+        isAnswering = false;
+        const pool = config[currentMode].levels[curLv-1].notes;
+        do { targetNote = pool[Math.floor(Math.random() * pool.length)]; } while (targetNote === lastTargetNote && pool.length > 1);
+        lastTargetNote = targetNote;
+        document.getElementById('count-display').innerText = `${11 - questionsLeft} / 10`;
+        drawScene();
+        generateChoices();
     }
 
     function generateChoices() {
@@ -357,42 +342,25 @@
         let others = allLetters.filter(l => l !== correctLetter).sort(() => Math.random() - 0.5);
         while (choices.length < 3) choices.push(others.pop());
         choices.sort(() => Math.random() - 0.5);
-
         const area = document.getElementById('answer-area');
         area.innerHTML = '';
         choices.forEach(letter => {
             const btn = document.createElement('button');
             btn.className = 'animal-btn';
             const data = animalData[letter];
-            
-            btn.innerHTML = `
-                <div class="img-container">
-                    <img src="${data.img}" class="animal-img" onerror="this.style.display='none'; this.parentElement.innerText='${data.emoji}';">
-                </div>
-                <div class="letter-name">${letter}</div>
-            `;
-
+            btn.innerHTML = `<div class="img-container"><img src="${data.img}" class="animal-img" onerror="this.style.display='none'; this.parentElement.innerText='${data.emoji}';"></div><div class="letter-name">${letter}</div>`;
             btn.onclick = () => {
                 if (isAnswering) return;
                 isAnswering = true;
-                const isCorrect = (letter === correctLetter);
-                const letterDiv = btn.querySelector('.letter-name');
-                
-                if (isCorrect) {
-                    score++;
-                    btn.style.background = "#90EE90";
-                    letterDiv.innerText = "✔️ " + letter;
+                if (letter === correctLetter) {
+                    score++; btn.style.background = "#90EE90";
+                    btn.querySelector('.letter-name').innerText = "✔️ " + letter;
                 } else {
-                    btn.style.background = "#FFB3B3";
-                    btn.classList.add('shake-btn');
-                    letterDiv.innerText = "❌ " + letter;
+                    btn.style.background = "#FFB3B3"; btn.classList.add('shake-btn');
+                    btn.querySelector('.letter-name').innerText = "❌ " + letter;
                 }
-
                 document.getElementById('score-val').innerText = score;
-                setTimeout(() => {
-                    questionsLeft--;
-                    if (questionsLeft > 0) nextQuestion(); else showResult();
-                }, 400);
+                setTimeout(() => { questionsLeft--; if (questionsLeft > 0) nextQuestion(); else showResult(); }, 400);
             };
             area.appendChild(btn);
         });
@@ -412,14 +380,7 @@
     function saveRecord() {
         const name = document.getElementById('playerNameInput').value.trim() || "匿名";
         const duration = Math.floor((endTime - startTime) / 1000);
-        const record = { 
-            name, 
-            mode: currentMode === 'treble' ? "高音" : "低音", 
-            lv: curLv, 
-            score, 
-            time: duration, 
-            date: new Date().toLocaleDateString() 
-        };
+        const record = { name, mode: currentMode === 'treble' ? "高音" : "低音", lv: curLv, score, time: duration, date: new Date().toLocaleDateString() };
         let history = JSON.parse(localStorage.getItem('cmsNoteRankCombined') || "[]");
         history.push(record);
         localStorage.setItem('cmsNoteRankCombined', JSON.stringify(history));
@@ -433,8 +394,15 @@
         document.getElementById('result-view').style.display = 'none';
         document.getElementById('mode-view').style.display = 'flex';
         document.getElementById('stats-bar').style.visibility = 'hidden';
-        targetNote = "";
-        drawScene();
+        targetNote = ""; drawScene();
+    }
+
+    function goBackToMode() {
+        document.getElementById('level-view').style.display = 'none';
+        document.getElementById('rank-view').style.display = 'none';
+        document.getElementById('mode-view').style.display = 'flex';
+        document.getElementById('stats-bar').style.visibility = 'hidden';
+        targetNote = ""; drawScene();
     }
 
     function showRank() {
@@ -442,11 +410,8 @@
         document.getElementById('rank-view').style.display = 'flex';
         let data = JSON.parse(localStorage.getItem('cmsNoteRankCombined') || "[]");
         data.sort((a, b) => b.score - a.score || a.time - b.time);
-        
         const body = document.getElementById('rank-body');
-        body.innerHTML = data.slice(0, 10).map((d, i) => `
-            <tr><td>${i+1}</td><td>${d.name}</td><td>${d.mode}</td><td>${d.lv}</td><td>${d.score}</td><td>${d.time}s</td></tr>
-        `).join('') || '<tr><td colspan="6">未有紀錄</td></tr>';
+        body.innerHTML = data.slice(0, 20).map((d, i) => `<tr><td>${i+1}</td><td>${d.name}</td><td>${d.mode}</td><td>${d.lv}</td><td>${d.score}</td><td>${d.time}s</td></tr>`).join('') || '<tr><td colspan="6">未有紀錄</td></tr>';
     }
 
     window.onload = () => drawScene();
