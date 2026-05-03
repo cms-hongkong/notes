@@ -319,7 +319,7 @@
         const fixedStaffHeight = (fixedMaxLines - 1) * s;
         const baseLineY = (canvas.height + fixedStaffHeight) / 2;
 
-        /* 線條顏色由下而上：最下面紅色、橙色、黃色、綠色、最上面紫色（無編號數字） */
+        /* 線條顏色由下而上（已調轉）：最下面紅色、橙色、黃色、綠色、最上面紫色（無編號數字） */
         const lineColors = {
             1: "#FF0000",  // 紅色（最下面）
             2: "#FFA500",  // 橙色
