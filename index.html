@@ -131,15 +131,6 @@
             animation: shakeEffect 0.3s ease-in-out 0s 1;
         }
 
-        @keyframes correctFlash {
-            0% { background-color: #FFF; }
-            50% { background-color: #90EE90; }
-            100% { background-color: #FFF; }
-        }
-        .correct-flash {
-            animation: correctFlash 0.4s ease-in-out 0s 1;
-        }
-
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -319,31 +310,29 @@
         const fixedStaffHeight = (fixedMaxLines - 1) * s;
         const baseLineY = (canvas.height + fixedStaffHeight) / 2;
 
-        /* 線條顏色由下而上（已調轉）：最下面紅色、橙色、黃色、綠色、最上面紫色（無編號數字） */
-        const lineColors = {
-            1: "#FF0000",  // 紅色（最下面）
+        /* 線條顏色由下而上：最下面紅色、橙色、黃色、綠色、最上面紫色（無編號數字） */
+        // 第一條線 (i=0) 始終在 baseLineY，它是最下面的線
+        const colors = {
+            1: "#FF0000",  // 紅色 (最下面)
             2: "#FFA500",  // 橙色
-            3: "#FFD700",  // 金黃色
+            3: "#FFD700",  // 黃色
             4: "#008000",  // 綠色
-            5: "#800080"   // 紫色（最上面）
+            5: "#800080"   // 紫色 (最上面)
         };
 
         for (let i = 0; i < curLv; i++) {
-            let y = baseLineY - (i * s);
+            let y = baseLineY - (i * s); 
             
-            // i=0 是目前最上面的線，i=curLv-1 是目前最下面的線
-            // 因此由下而上的編號為：
-            const lineNumberFromBottom = curLv - i;
-            
-            ctx.strokeStyle = lineColors[lineNumberFromBottom];
+            // i=0 代表最下面那條線，所以顏色編號就是 i + 1
+            ctx.strokeStyle = colors[i + 1];
             ctx.lineWidth = 5;
+            
             ctx.beginPath(); 
             ctx.moveTo(100, y); 
             ctx.lineTo(900, y); 
             ctx.stroke();
         }
 
-        // 恢復黑色繪製高音譜號
         ctx.fillStyle = "#111"; 
         ctx.font = `${s * 8.6}px serif`; 
         ctx.fillText("𝄞", 110, (baseLineY - s * 0.4) + clefDownTotal);
@@ -359,7 +348,7 @@
             ctx.fill();
 
             if (targetNote === "C4") {
-                ctx.strokeStyle = "#333"; // 加線使用深灰色
+                ctx.strokeStyle = "#333"; 
                 ctx.lineWidth = 5;
                 ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x + s, y); ctx.stroke();
             }
@@ -369,12 +358,10 @@
     function showCorrectEffect(btn, letterSpan) {
         btn.style.backgroundColor = "#90EE90";
         if (letterSpan) letterSpan.textContent = "✔️ " + btn.querySelector('.letter-name')?.innerText?.replace(/[✔️❌]/g, '') || "✔️";
-        
         setTimeout(() => {
             btn.style.backgroundColor = "#FFF";
             if (letterSpan && letterSpan.textContent) {
-                const cleanText = letterSpan.textContent.replace(/[✔️❌]/g, '');
-                letterSpan.textContent = cleanText;
+                letterSpan.textContent = letterSpan.textContent.replace(/[✔️❌]/g, '').trim();
             }
         }, 400);
     }
@@ -383,13 +370,11 @@
         btn.style.backgroundColor = "#FFB3B3";
         btn.classList.add('shake-btn');
         if (letterSpan) letterSpan.textContent = "❌ " + btn.querySelector('.letter-name')?.innerText?.replace(/[✔️❌]/g, '') || "❌";
-        
         setTimeout(() => {
             btn.style.backgroundColor = "#FFF";
             btn.classList.remove('shake-btn');
             if (letterSpan && letterSpan.textContent) {
-                const cleanText = letterSpan.textContent.replace(/[✔️❌]/g, '');
-                letterSpan.textContent = cleanText;
+                letterSpan.textContent = letterSpan.textContent.replace(/[✔️❌]/g, '').trim();
             }
         }, 400);
     }
@@ -426,7 +411,6 @@
         const pool = [...new Set(notesMap[curLv].map(n => n.charAt(0)))];
         let choices = [correctLetter];
         let others = pool.filter(l => l !== correctLetter).sort(() => Math.random() - 0.5);
-        
         while (choices.length < 3 && others.length > 0) choices.push(others.pop());
         choices.sort(() => Math.random() - 0.5);
 
@@ -435,7 +419,6 @@
         choices.forEach(letter => {
             const btn = document.createElement('button');
             btn.className = 'animal-btn';
-            
             const img = document.createElement('img');
             img.src = animalImgs[letter];
             img.className = 'animal-img';
@@ -449,10 +432,8 @@
             btn.onclick = () => {
                 if (isAnswering) return;
                 isAnswering = true;
-                
                 const isCorrect = (letter === targetNote.charAt(0));
                 const letterSpan = btn.querySelector('.letter-name');
-                
                 if (isCorrect) {
                     showCorrectEffect(btn, letterSpan);
                     score++;
@@ -460,13 +441,11 @@
                 } else {
                     showWrongEffect(btn, letterSpan);
                 }
-                
                 questionsLeft--;
-                if (questionsLeft > 0) {
-                    setTimeout(() => { nextQuestion(); }, 400);
-                } else {
-                    setTimeout(() => { showResult(); }, 400);
-                }
+                setTimeout(() => {
+                    if (questionsLeft > 0) nextQuestion();
+                    else showResult();
+                }, 400);
             };
             area.appendChild(btn);
         });
@@ -479,7 +458,6 @@
         document.getElementById('menu-view').style.display = 'none';
         document.getElementById('rank-view').style.display = 'none';
         document.getElementById('result-view').style.display = 'block';
-        
         document.getElementById('result-text').innerText = `獲得分數：${score} / 10`;
         document.getElementById('time-text').innerText = `耗時：${duration} 秒`;
     }
@@ -495,15 +473,8 @@
         document.getElementById('playerNameInput').value = ""; 
     }
 
-    function submitAndRestart() {
-        saveRecord();
-        startGame(curLv);
-    }
-
-    function submitAndGoHome() {
-        saveRecord();
-        goHome();
-    }
+    function submitAndRestart() { saveRecord(); startGame(curLv); }
+    function submitAndGoHome() { saveRecord(); goHome(); }
 
     function showRank() {
         document.getElementById('menu-view').style.display = 'none';
@@ -519,14 +490,7 @@
         data.sort((a, b) => (b.score - a.score) || (a.time - b.time));
         const body = document.getElementById('rank-body');
         body.innerHTML = data.slice(0, 15).map((d, i) => `
-            <tr>
-                <td>${i+1}</td>
-                <td>${d.name}</td>
-                <td>${d.lv}</td>
-                <td>${d.score}</td>
-                <td>${d.time}s</td>
-                <td>${d.date}</td>
-            </tr>
+            <tr><td>${i+1}</td><td>${d.name}</td><td>${d.lv}</td><td>${d.score}</td><td>${d.time}s</td><td>${d.date}</td></tr>
         `).join('') || '<tr><td colspan="6">尚未有紀錄</td></tr>';
     }
 
