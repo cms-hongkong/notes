@@ -2,8 +2,8 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMS認音大挑戰 - 全屏適配版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CMS認音大挑戰 - 跨平台版</title>
     <style>
         :root {
             --forest-green: #1B4332;
@@ -13,163 +13,194 @@
             --text-serif: "Microsoft JhengHei", "微軟正黑體", sans-serif;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
             font-family: var(--text-serif);
             background: linear-gradient(135deg, #D8F3DC 0%, #95D5B2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: 100dvh; /* 動態視口高度，適配手機 Toolbar */
             margin: 0;
-            padding: 5px; /* 手機邊緣留少少位 */
-            box-sizing: border-box;
-            color: var(--forest-green);
-            overflow: hidden; /* 防止手機瀏覽器上下彈跳 */
+            padding: 10px;
+            overflow: hidden; /* 防止手機瀏覽器出現多餘捲軸 */
         }
 
         #game-container {
             background: rgba(255, 255, 255, 0.95);
-            padding: 15px;
-            border-radius: 30px;
-            box-shadow: 0 8px 0px var(--wood-brown), 0 15px 30px rgba(0,0,0,0.15);
+            padding: clamp(10px, 4vw, 25px);
+            border-radius: clamp(20px, 5vw, 40px);
+            box-shadow: 0 12px 0px var(--wood-brown), 0 20px 40px rgba(0,0,0,0.15);
             width: 100%;
-            max-width: 980px;
-            height: 95vh; /* 限制高度，確保唔使 scroll */
-            display: flex;
-            flex-direction: column;
+            max-width: 1000px; /* IPAD 闊度上限 */
+            height: auto;
+            max-height: 95dvh;
             position: relative;
             text-align: center;
-            border: 4px solid var(--sand-light);
-            box-sizing: border-box;
+            border: 6px solid var(--sand-light);
+            display: flex;
+            flex-direction: column;
         }
 
-        /* 標題藝術風格 - 手機版自動縮小 */
+        /* 藝術標題 - 響應式縮放 */
         .art-title {
-            font-size: 2.5rem; /* 手機預設大小 */
+            font-size: clamp(1.8rem, 8vw, 3.5rem);
             font-weight: 900;
-            margin: 10px 0;
+            margin-bottom: clamp(10px, 3vw, 25px);
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* 手機上如果太闊會自動換行 */
             gap: 5px;
         }
-
-        @media (min-width: 768px) { .art-title { font-size: 4rem; } } /* iPad/電腦放大 */
 
         .art-title span {
             display: inline-block;
             text-shadow: 3px 3px 0px var(--wood-brown);
             filter: drop-shadow(2px 2px 0px white);
         }
-        
-        /* 顏色保持 */
+
+        /* 標題色彩 */
         .art-title span:nth-child(1) { color: #FF6B6B; transform: rotate(-5deg); }
         .art-title span:nth-child(2) { color: #4ECDC4; transform: rotate(3deg); }
         .art-title span:nth-child(3) { color: #FFD93D; transform: rotate(-3deg); }
         .art-title span:nth-child(4) { color: #6BCB77; transform: rotate(4deg); }
         .art-title span:nth-child(5) { color: #4D96FF; transform: rotate(-4deg); }
         .art-title span:nth-child(6) { color: #F47174; transform: rotate(3deg); }
-        .art-title span:nth-child(7) { color: #FF9F45; transform: rotate(-5deg); }
+        .art-title span:nth-child(7) { color: #FF9F45; transform: rotate(-4deg); }
         .art-title span:nth-child(8) { color: #9B59B6; transform: rotate(5deg); }
 
         .stats-bar {
             display: flex;
-            justify-content: space-around;
-            margin-bottom: 5px;
+            justify-content: space-between;
+            margin-bottom: 10px;
             visibility: hidden;
+            gap: 5px;
         }
 
         .badge {
             background: var(--sand-light);
             padding: 5px 12px;
             border-radius: 15px;
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
             font-weight: bold;
             border: 2px solid var(--wood-brown);
+            white-space: nowrap;
         }
 
         #canvas-wrapper {
             background: white;
             border-radius: 20px;
             border: 4px solid var(--leaf-green);
-            margin: 5px auto;
+            margin: 10px auto;
             width: 100%; 
-            flex-grow: 1; /* 佔據剩餘空間 */
-            display: flex;
-            align-items: center;
-            overflow: hidden;
+            padding: 5px;
+            position: relative;
         }
 
-        canvas { width: 100%; height: auto; max-height: 100%; display: block; }
+        canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            aspect-ratio: 1000 / 600; /* 保持固定比例 */
+        }
 
-        /* 答案區適配 */
+        /* 答案區域 - 手機版自動縮細 */
         #answer-area {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
-            padding-bottom: 5px;
+            gap: clamp(10px, 3vw, 25px);
+            margin: 15px 0;
+            min-height: clamp(120px, 25vw, 180px);
         }
 
         .animal-btn {
             background: #FFF;
             border: 3px solid var(--wood-brown);
-            border-radius: 20px;
-            padding: 10px;
-            width: 30%; /* 手機版佔比例 */
-            max-width: 140px;
+            border-radius: clamp(15px, 4vw, 25px);
+            padding: clamp(8px, 2vw, 15px);
+            width: clamp(80px, 25vw, 140px); /* 根據螢幕闊度調整 */
             cursor: pointer;
-            box-shadow: 0 5px 0 var(--wood-brown);
+            box-shadow: 0 6px 0 var(--wood-brown);
+            transition: all 0.1s;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .img-container { width: 60px; height: 60px; font-size: 2.5rem; }
-        @media (min-width: 768px) { .img-container { width: 80px; height: 80px; font-size: 3.5rem; } }
+        .animal-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--wood-brown); }
 
-        .letter-name { font-size: 1.5rem; font-weight: bold; color: var(--wood-brown); }
-        @media (min-width: 768px) { .letter-name { font-size: 2.2rem; } }
+        .img-container { 
+            width: 100%; 
+            height: clamp(50px, 15vw, 85px); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: clamp(2rem, 10vw, 3.5rem); 
+        }
+        .animal-img { width: 100%; height: 100%; object-fit: contain; }
+        .letter-name { font-size: clamp(1.5rem, 6vw, 2.5rem); font-weight: bold; color: var(--wood-brown); }
 
+        /* 全屏覆蓋層 */
         #overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.98);
-            border-radius: 26px;
+            border-radius: clamp(20px, 5vw, 40px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 100;
-            padding: 15px;
-            box-sizing: border-box;
+            padding: 20px;
         }
 
         .btn-forest {
             font-family: var(--text-serif);
             background: var(--forest-green);
             color: white;
-            padding: 12px 20px;
-            border-radius: 40px;
-            font-size: 1.1rem;
+            padding: clamp(12px, 3vw, 18px) clamp(20px, 5vw, 35px);
+            border-radius: 50px;
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
             border: none;
             cursor: pointer;
-            box-shadow: 0 5px 0 var(--wood-brown);
+            box-shadow: 0 6px 0 var(--wood-brown);
             font-weight: bold;
-            margin: 6px;
-            width: 85%; /* 手機版按鈕加闊方便撳 */
-            max-width: 300px;
+            margin: 8px;
+            width: clamp(240px, 80vw, 320px);
         }
 
-        /* 排行榜表格適配 */
-        #rank-view { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
-        .rank-table-container { width: 95%; max-height: 60vh; overflow-y: auto; background: white; border-radius: 15px; border: 2px solid var(--leaf-green); }
-        .rank-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        @media (min-width: 768px) { .rank-table { font-size: 1.1rem; } }
-        .rank-table th { background: var(--leaf-green); color: white; padding: 8px; position: sticky; top: 0; }
+        /* 排行榜優化 */
+        #rank-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .rank-table-container {
+            width: 100%;
+            max-height: 50vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 15px;
+            border: 2px solid var(--leaf-green);
+            margin: 15px 0;
+        }
+
+        .rank-table { width: 100%; border-collapse: collapse; font-size: clamp(0.8rem, 2.5vw, 1rem); }
+        .rank-table th { background: var(--leaf-green); color: white; padding: 10px; position: sticky; top: 0; }
         .rank-table td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; }
 
-        input#playerNameInput { padding: 10px; font-size: 1rem; border-radius: 40px; border: 2px solid var(--leaf-green); width: 80%; max-width: 250px; margin-bottom: 10px; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        .shake-btn { animation: shake 0.3s; }
+
+        /* 特別適配長手機 (如 iPhone 1170x2532) */
+        @media (max-aspect-ratio: 1/2) {
+            #game-container { padding: 15px 10px; }
+            .art-title { margin-top: 40px; }
+        }
     </style>
 </head>
 <body>
@@ -177,12 +208,12 @@
 <div id="game-container">
     <div class="stats-bar" id="stats-bar">
         <div class="badge" id="lv-display">LV 1</div>
-        <div class="badge" id="count-display">1/10</div>
-        <div class="badge">⭐<span id="score-val">0</span></div>
+        <div class="badge" id="count-display">1 / 10</div>
+        <div class="badge">⭐ <span id="score-val">0</span></div>
     </div>
 
     <div id="canvas-wrapper">
-        <canvas id="gameCanvas" width="1000" height="650"></canvas>
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
     </div>
     
     <div id="answer-area"></div>
@@ -192,36 +223,35 @@
             <div class="art-title">
                 <span>C</span><span>M</span><span>S</span><span>認</span><span>音</span><span>大</span><span>挑</span><span>戰</span>
             </div>
-            <p style="color: var(--wood-brown); font-weight: bold; margin-bottom: 10px;">請選擇譜號：</p>
-            <button class="btn-forest" style="height: 60px;" onclick="selectMode('treble')">𝄞 高音譜號</button>
-            <button class="btn-forest" style="height: 60px;" onclick="selectMode('bass')">𝄢 低音譜號</button>
+            <button class="btn-forest" style="background: #2D6A4F;" onclick="selectMode('treble')">𝄞 高音譜號</button>
+            <button class="btn-forest" style="background: #40916C;" onclick="selectMode('bass')">𝄢 低音譜號</button>
             <button class="btn-forest" style="background: var(--wood-brown); margin-top: 20px;" onclick="showRank()">🏆 排行榜</button>
         </div>
 
-        <div id="level-view" style="display: none; width: 100%;">
-            <h2 id="level-title" style="margin-bottom: 10px;">選擇等級</h2>
-            <div id="level-buttons" style="display: flex; flex-wrap: wrap; justify-content: center; width: 100%;"></div>
-            <button class="btn-forest" style="background: #999; margin-top: 15px;" onclick="goBackToMode()">返回</button>
+        <div id="level-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+            <h2 id="level-title" style="font-size: clamp(1.5rem, 5vw, 2rem); margin-bottom: 15px;">選擇等級</h2>
+            <div id="level-buttons" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;"></div>
+            <button class="btn-forest" style="background: #999; margin-top: 20px;" onclick="goBackToMode()">返回</button>
         </div>
 
-        <div id="result-view" style="display: none; width: 100%;">
-            <h2 style="color: var(--forest-green); margin: 0;">太利害啦！</h2>
-            <p id="result-text" style="font-size: 1.4rem; margin: 10px 0;"></p>
-            <p id="time-text" style="color: var(--wood-brown); margin-bottom: 10px;"></p>
-            <input type="text" id="playerNameInput" placeholder="你的名字..." maxlength="10">
+        <div id="result-view" style="display: none; width: 100%; text-align: center;">
+            <h2 style="font-size: 2.5rem; color: var(--forest-green);">太利害啦！</h2>
+            <p id="result-text" style="font-size: 1.5rem;"></p>
+            <p id="time-text" style="color: var(--wood-brown);"></p>
+            <input type="text" id="playerNameInput" placeholder="你的名字..." maxlength="10" style="padding: 12px; border-radius: 20px; border: 2px solid var(--leaf-green); margin-bottom: 15px; width: 80%; font-size: 1.2rem; text-align: center;">
             <button class="btn-forest" onclick="submitAndRestart()">再玩一次</button>
             <button class="btn-forest" style="background: var(--leaf-green); color: var(--forest-green);" onclick="submitAndGoHome()">回首頁</button>
         </div>
 
         <div id="rank-view">
-            <h2 style="margin: 10px 0;">🏆 高手排行榜</h2>
+            <h2 style="margin: 0;">🏆 高手排行榜</h2>
             <div class="rank-table-container">
                 <table class="rank-table">
-                    <thead><tr><th>排名</th><th>名稱</th><th>譜號</th><th>LV</th><th>分</th><th>秒</th></tr></thead>
+                    <thead><tr><th>排名</th><th>名稱</th><th>譜</th><th>LV</th><th>分</th><th>秒</th></tr></thead>
                     <tbody id="rank-body"></tbody>
                 </table>
             </div>
-            <button class="btn-forest" style="margin-top: 15px;" onclick="goBackToMode()">返回</button>
+            <button class="btn-forest" onclick="goBackToMode()">返回</button>
         </div>
     </div>
 </div>
@@ -239,13 +269,13 @@
     let startTime, endTime;
     let isAnswering = false;
 
-    const s = 91; 
+    const s = 85; // 稍微縮細音符間距以適配更多屏幕
 
     const config = {
         treble: {
             clef: "𝄞",
-            symbolOffset: 70, // 移高 20px
-            fontSizeMult: 8.6,
+            symbolOffset: 65, // 高音譜號位置 (已移高)
+            fontSizeMult: 8,
             levels: [
                 { notes: ["C4", "D4", "E4"] },
                 { notes: ["C4", "D4", "E4", "F4", "G4"] },
@@ -257,8 +287,8 @@
         },
         bass: {
             clef: "𝄢",
-            symbolOffset: 95,
-            fontSizeMult: 6.075,
+            symbolOffset: 90,
+            fontSizeMult: 5.8,
             levels: [
                 { notes: ["C4", "B3", "A3"] },
                 { notes: ["C4", "B3", "A3", "G3", "F3"] },
@@ -282,14 +312,14 @@
         document.getElementById('mode-view').style.display = 'none';
         document.getElementById('rank-view').style.display = 'none';
         document.getElementById('level-view').style.display = 'flex';
+        document.getElementById('level-title').innerText = mode === 'treble' ? "高音譜號 - 挑戰" : "低音譜號 - 挑戰";
         
         const btnContainer = document.getElementById('level-buttons');
         btnContainer.innerHTML = '';
         for(let i=1; i<=5; i++) {
             const btn = document.createElement('button');
             btn.className = 'btn-forest';
-            btn.style.width = "40%"; // Level 掣喺手機排兩行
-            btn.style.fontSize = "0.9rem";
+            btn.style.width = "clamp(110px, 40vw, 200px)";
             btn.innerText = "LV " + i;
             btn.onclick = () => startGame(i);
             btnContainer.appendChild(btn);
@@ -309,26 +339,31 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const modeConf = config[currentMode];
         const colors = ["#FF0000", "#FFA500", "#FFD700", "#008000", "#800080"];
+        
         const staffStartY = currentMode === 'treble' ? canvas.height/2 + 2*s : canvas.height/2 - 2*s;
         
         for (let i = 0; i < curLv; i++) {
             const y = currentMode === 'treble' ? staffStartY - (i * s) : staffStartY + (i * s);
             ctx.strokeStyle = colors[i];
             ctx.lineWidth = 6;
-            ctx.beginPath(); ctx.moveTo(50, y); ctx.lineTo(950, y); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(80, y); ctx.lineTo(920, y);
+            ctx.stroke();
         }
 
         ctx.fillStyle = "#111";
         ctx.font = `${s * modeConf.fontSizeMult}px serif`;
         const clefY = currentMode === 'treble' ? staffStartY + modeConf.symbolOffset : staffStartY + 3*s + modeConf.symbolOffset;
-        ctx.fillText(modeConf.clef, 60, clefY);
+        ctx.fillText(modeConf.clef, 90, clefY);
 
         if (targetNote) {
             const steps = modeConf.steps[targetNote];
             const y = currentMode === 'treble' ? staffStartY - (steps * (s/2)) : staffStartY + (steps * (s/2));
-            const x = canvas.width / 2 + 50;
+            const x = canvas.width / 2 + 80;
             ctx.fillStyle = "black";
-            ctx.beginPath(); ctx.ellipse(x, y, s * 0.7, s * 0.5, -Math.PI / 8, 0, 2 * Math.PI); ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x, y, s * 0.65, s * 0.46, -Math.PI / 8, 0, 2 * Math.PI);
+            ctx.fill();
             if (steps <= -2 || steps >= 10) {
                 ctx.strokeStyle = "#333"; ctx.lineWidth = 6;
                 ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x + s, y); ctx.stroke();
@@ -341,7 +376,7 @@
         const pool = config[currentMode].levels[curLv-1].notes;
         do { targetNote = pool[Math.floor(Math.random() * pool.length)]; } while (targetNote === lastTargetNote && pool.length > 1);
         lastTargetNote = targetNote;
-        document.getElementById('count-display').innerText = `${11 - questionsLeft}/10`;
+        document.getElementById('count-display').innerText = `${11 - questionsLeft} / 10`;
         document.getElementById('score-val').innerText = score;
         document.getElementById('lv-display').innerText = `LV ${curLv}`;
         drawScene();
@@ -368,10 +403,12 @@
                 isAnswering = true;
                 if (letter === correctLetter) {
                     score++; btn.style.background = "#90EE90";
+                    btn.querySelector('.letter-name').innerText = "✔️ " + letter;
                 } else {
-                    btn.style.background = "#FFB3B3";
+                    btn.style.background = "#FFB3B3"; btn.classList.add('shake-btn');
+                    btn.querySelector('.letter-name').innerText = "❌ " + letter;
                 }
-                setTimeout(() => { questionsLeft--; if (questionsLeft > 0) nextQuestion(); else showResult(); }, 300);
+                setTimeout(() => { questionsLeft--; if (questionsLeft > 0) nextQuestion(); else showResult(); }, 400);
             };
             area.appendChild(btn);
         });
@@ -383,7 +420,9 @@
         document.getElementById('overlay').style.display = 'flex';
         document.getElementById('mode-view').style.display = 'none';
         document.getElementById('level-view').style.display = 'none';
-        document.getElementById('result-view').style.display = 'block';
+        document.getElementById('result-view').style.display = 'flex';
+        document.getElementById('result-view').style.flexDirection = 'column';
+        document.getElementById('result-view').style.alignItems = 'center';
         document.getElementById('result-text').innerText = `得分：${score} / 10`;
         document.getElementById('time-text').innerText = `耗時：${duration} 秒`;
     }
@@ -392,9 +431,9 @@
         const name = document.getElementById('playerNameInput').value.trim() || "匿名";
         const duration = Math.floor((endTime - startTime) / 1000);
         const record = { name, mode: currentMode === 'treble' ? "高" : "低", lv: curLv, score, time: duration, date: new Date().toLocaleDateString() };
-        let history = JSON.parse(localStorage.getItem('cmsRankMobile') || "[]");
+        let history = JSON.parse(localStorage.getItem('cmsNoteRankV3') || "[]");
         history.push(record);
-        localStorage.setItem('cmsRankMobile', JSON.stringify(history));
+        localStorage.setItem('cmsNoteRankV3', JSON.stringify(history));
     }
 
     function submitAndRestart() { saveRecord(); startGame(curLv); }
@@ -402,8 +441,8 @@
 
     function goHome() {
         document.getElementById('playerNameInput').value = "";
-        document.getElementById('overlay').style.display = 'flex';
         document.getElementById('result-view').style.display = 'none';
+        document.getElementById('overlay').style.display = 'flex';
         document.getElementById('mode-view').style.display = 'flex';
         document.getElementById('stats-bar').style.visibility = 'hidden';
         targetNote = ""; drawScene();
@@ -420,7 +459,7 @@
     function showRank() {
         document.getElementById('mode-view').style.display = 'none';
         document.getElementById('rank-view').style.display = 'flex';
-        let data = JSON.parse(localStorage.getItem('cmsRankMobile') || "[]");
+        let data = JSON.parse(localStorage.getItem('cmsNoteRankV3') || "[]");
         data.sort((a, b) => b.score - a.score || a.time - b.time);
         const body = document.getElementById('rank-body');
         body.innerHTML = data.slice(0, 15).map((d, i) => `<tr><td>${i+1}</td><td>${d.name}</td><td>${d.mode}</td><td>${d.lv}</td><td>${d.score}</td><td>${d.time}s</td></tr>`).join('') || '<tr><td colspan="6">未有紀錄</td></tr>';
