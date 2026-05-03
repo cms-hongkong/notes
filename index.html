@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMS認音大挑戰 - 綜合篇</title>
+    <title>CMS認音大挑戰 - 藝術風格版</title>
     <style>
         :root {
             --forest-green: #1B4332;
             --leaf-green: #74C69D;
             --wood-brown: #604439;
             --sand-light: #F8F4E3;
-            --text-serif: "PMingLiU", "SimSun", "Times New Roman", serif;
+            /* 選用比較圓潤嘅字體 */
+            --text-serif: "Microsoft JhengHei", "微軟正黑體", "Rounded Mplus 1c", sans-serif;
         }
 
         body {
@@ -38,7 +39,33 @@
             border: 6px solid var(--sand-light);
         }
 
-        h1 { font-size: 2.5rem; margin: 10px 0; }
+        /* 第一頁標題藝術風格 */
+        .art-title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            filter: drop-shadow(3px 3px 0px white);
+        }
+
+        .art-title span {
+            display: inline-block;
+            padding: 0 5px;
+            text-shadow: 4px 4px 0px var(--wood-brown);
+            transform: rotate(-5deg);
+        }
+        
+        /* 每個字唔同顏色，對應動物色彩風格 */
+        .art-title span:nth-child(1) { color: #FF6B6B; transform: rotate(-8deg); } /* C */
+        .art-title span:nth-child(2) { color: #4ECDC4; transform: rotate(5deg); }  /* M */
+        .art-title span:nth-child(3) { color: #FFD93D; transform: rotate(-4deg); } /* S */
+        .art-title span:nth-child(4) { color: #6BCB77; transform: rotate(6deg); }  /* 認 */
+        .art-title span:nth-child(5) { color: #4D96FF; transform: rotate(-5deg); } /* 音 */
+        .art-title span:nth-child(6) { color: #F47174; transform: rotate(4deg); }  /* 大 */
+        .art-title span:nth-child(7) { color: #FF9F45; transform: rotate(-6deg); } /* 挑 */
+        .art-title span:nth-child(8) { color: #9B59B6; transform: rotate(7deg); }  /* 戰 */
 
         .stats-bar {
             display: flex;
@@ -124,14 +151,14 @@
             width: 280px;
         }
 
-        /* 排行榜視圖：垂直置中關鍵 CSS */
+        /* 排行榜視圖：垂直置中 */
         #rank-view {
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             width: 100%;
-            height: 100%; /* 撐滿父容器以置中 */
+            height: 100%;
         }
 
         .rank-table-container {
@@ -155,8 +182,6 @@
 <body>
 
 <div id="game-container">
-    <h1 id="main-title">CMS認音大挑戰</h1>
-    
     <div class="stats-bar" id="stats-bar">
         <div class="badge" id="lv-display">LV 1</div>
         <div class="badge" id="count-display">1 / 10</div>
@@ -171,7 +196,10 @@
 
     <div id="overlay">
         <div id="mode-view" style="display: flex; flex-direction: column; align-items: center;">
-            <h1 style="font-size: 3rem; margin-bottom: 20px;">請選擇譜號</h1>
+            <div class="art-title">
+                <span>C</span><span>M</span><span>S</span><span>認</span><span>音</span><span>大</span><span>挑</span><span>戰</span>
+            </div>
+            <p style="color: var(--wood-brown); font-weight: bold; font-size: 1.2rem; margin-bottom: 15px;">請選擇挑戰譜號：</p>
             <button class="btn-forest" style="height: 80px; font-size: 1.8rem;" onclick="selectMode('treble')">𝄞 高音譜號</button>
             <button class="btn-forest" style="height: 80px; font-size: 1.8rem;" onclick="selectMode('bass')">𝄢 低音譜號</button>
             <button class="btn-forest" style="background: var(--wood-brown); width: 220px; margin-top: 30px;" onclick="showRank()">🏆 高手排行榜</button>
@@ -223,7 +251,7 @@
     const config = {
         treble: {
             clef: "𝄞",
-            symbolOffset: 80, // 原本 90, 減 10 變為移高 10px
+            symbolOffset: 70, // 移高 20px (原本 90)
             fontSizeMult: 8.6,
             levels: [
                 { notes: ["C4", "D4", "E4"] },
@@ -291,10 +319,9 @@
         const modeConf = config[currentMode];
         const colors = ["#FF0000", "#FFA500", "#FFD700", "#008000", "#800080"];
         
-        // 核心修改：根據 curLv 決定繪製線條的數量
         const staffStartY = currentMode === 'treble' ? canvas.height/2 + 2*s : canvas.height/2 - 2*s;
         
-        for (let i = 0; i < curLv; i++) { // 只循環到 curLv
+        for (let i = 0; i < curLv; i++) {
             const y = currentMode === 'treble' ? staffStartY - (i * s) : staffStartY + (i * s);
             ctx.strokeStyle = colors[i];
             ctx.lineWidth = 5;
@@ -303,7 +330,6 @@
             ctx.stroke();
         }
 
-        // 譜號位置調整
         ctx.fillStyle = "#111";
         ctx.font = `${s * modeConf.fontSizeMult}px serif`;
         const clefY = currentMode === 'treble' ? staffStartY + modeConf.symbolOffset : staffStartY + 3*s + modeConf.symbolOffset;
@@ -324,7 +350,6 @@
         }
     }
 
-    // 其他遊戲逻辑保持不变...
     function nextQuestion() {
         isAnswering = false;
         const pool = config[currentMode].levels[curLv-1].notes;
@@ -381,9 +406,9 @@
         const name = document.getElementById('playerNameInput').value.trim() || "匿名";
         const duration = Math.floor((endTime - startTime) / 1000);
         const record = { name, mode: currentMode === 'treble' ? "高音" : "低音", lv: curLv, score, time: duration, date: new Date().toLocaleDateString() };
-        let history = JSON.parse(localStorage.getItem('cmsNoteRankCombined') || "[]");
+        let history = JSON.parse(localStorage.getItem('cmsNoteRankCombinedArt') || "[]");
         history.push(record);
-        localStorage.setItem('cmsNoteRankCombined', JSON.stringify(history));
+        localStorage.setItem('cmsNoteRankCombinedArt', JSON.stringify(history));
     }
 
     function submitAndRestart() { saveRecord(); startGame(curLv); }
@@ -408,7 +433,7 @@
     function showRank() {
         document.getElementById('mode-view').style.display = 'none';
         document.getElementById('rank-view').style.display = 'flex';
-        let data = JSON.parse(localStorage.getItem('cmsNoteRankCombined') || "[]");
+        let data = JSON.parse(localStorage.getItem('cmsNoteRankCombinedArt') || "[]");
         data.sort((a, b) => b.score - a.score || a.time - b.time);
         const body = document.getElementById('rank-body');
         body.innerHTML = data.slice(0, 20).map((d, i) => `<tr><td>${i+1}</td><td>${d.name}</td><td>${d.mode}</td><td>${d.lv}</td><td>${d.score}</td><td>${d.time}s</td></tr>`).join('') || '<tr><td colspan="6">未有紀錄</td></tr>';
