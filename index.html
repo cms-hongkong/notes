@@ -11,7 +11,6 @@
             --wood-brown: #604439;
             --sand-light: #F8F4E3;
             --text-serif: "Microsoft JhengHei", "微軟正黑體", sans-serif;
-            --font-kai: "標楷體", "BiauKai", "DFKai-SB", serif; /* 新增標楷體變數 */
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -63,7 +62,7 @@
         /* 首頁/選單的大標題 */
         .main-menu-title {
             font-size: clamp(2rem, 9vw, 4rem);
-            margin-bottom: clamp(10px, 4vw, 20px);
+            margin-bottom: clamp(15px, 5vw, 30px);
         }
 
         .art-title span {
@@ -194,15 +193,6 @@
 
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
         .shake-btn { animation: shake 0.3s; }
-        
-        /* 標楷體副標題樣式 */
-        .subtitle-kai {
-            font-family: var(--font-kai);
-            font-size: clamp(1.3rem, 4.5vw, 2rem);
-            color: var(--forest-green);
-            margin-bottom: 15px;
-            letter-spacing: 2px;
-        }
     </style>
 </head>
 <body>
@@ -225,30 +215,31 @@
     <div id="answer-area"></div>
 
     <div id="overlay">
+        <!-- 首頁 -->
         <div id="mode-view" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
             <div class="art-title main-menu-title">
                 <span>卡</span><span>雅</span><span>認</span><span>音</span><span>大</span><span>挑</span><span>戰</span>
             </div>
-            
-            <!-- 首頁新增標楷體 -->
-            <div class="subtitle-kai">卡雅音樂教室</div>
-
             <p style="color: var(--wood-brown); font-weight: bold; margin-bottom: 10px;">請選擇譜號模式</p>
             <button class="btn-forest" style="background: #2D6A4F;" onclick="selectMode('treble')">𝄞 高音譜號模式</button>
             <button class="btn-forest" style="background: #40916C;" onclick="selectMode('bass')">𝄢 低音譜號模式</button>
             <button class="btn-forest" style="background: var(--wood-brown); margin-top: 20px;" onclick="showRank()">🏆 排行榜紀錄</button>
+            
+            <!-- 加入底部文字 -->
+            <div style="margin-top: 30px; font-family: '微軟正黑體', sans-serif; font-weight: bold; color: var(--wood-brown); font-size: clamp(1rem, 3vw, 1.2rem);">卡雅音樂教室</div>
         </div>
 
+        <!-- 難度選擇頁面 -->
         <div id="level-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
-            
-            <!-- 難度選擇頁新增標楷體 -->
-            <div class="subtitle-kai" style="margin-bottom: 5px;">卡雅音樂教室</div>
-            
             <h2 id="level-title" style="font-size: clamp(1.5rem, 5vw, 2rem); margin-bottom: 15px;">選擇難度等級</h2>
             <div id="level-buttons" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;"></div>
             <button class="btn-forest" style="background: #999; margin-top: 20px;" onclick="goBackToMode()">返回主選單</button>
+            
+            <!-- 加入底部文字 -->
+            <div style="margin-top: 30px; font-family: '微軟正黑體', sans-serif; font-weight: bold; color: var(--wood-brown); font-size: clamp(1rem, 3vw, 1.2rem);">卡雅音樂教室</div>
         </div>
 
+        <!-- 結果頁面 -->
         <div id="result-view" style="display: none; width: 100%; text-align: center;">
             <h2 style="font-size: 2.2rem; color: var(--forest-green);">太棒了！完成挑戰！</h2>
             <p id="result-text" style="font-size: 1.5rem;"></p>
@@ -258,6 +249,7 @@
             <button class="btn-forest" style="background: var(--leaf-green); color: var(--forest-green);" onclick="submitAndGoHome()">回到首頁</button>
         </div>
 
+        <!-- 排行榜頁面 -->
         <div id="rank-view" style="display: none; width: 100%; align-items: center;">
             <h2 style="margin: 0;">🏆 高手排行榜</h2>
             <div class="rank-table-container">
