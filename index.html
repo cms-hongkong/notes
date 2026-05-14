@@ -190,7 +190,6 @@
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
         .shake-btn { animation: shake 0.3s; }
 
-        /* 新增底部文字樣式 */
         .footer-brand {
             font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
             color: var(--wood-brown);
@@ -221,7 +220,6 @@
     
     <div id="answer-area"></div>
 
-    <!-- 每一頁底部都會看到的品牌文字 -->
     <div class="footer-brand">卡 雅 音 樂 教 室</div>
 
     <div id="overlay">
@@ -230,7 +228,7 @@
                 <span>卡</span><span>雅</span><span>認</span><span>音</span><span>大</span><span>挑</span><span>戰</span>
             </div>
             <p style="color: var(--wood-brown); font-weight: bold; margin-bottom: 10px;">請選擇譜號模式</p>
-            <button class="btn-forest" style="background: #2D6A4F;" onclick="selectMode('treble')">𝄞 高音譜號模式</button>
+            <button class="btn-forest" style="background: #2D6A4F;" onclick="selectMode('treble')">辦 高音譜號模式</button>
             <button class="btn-forest" style="background: #40916C;" onclick="selectMode('bass')">𝄢 低音譜號模式</button>
             <button class="btn-forest" style="background: var(--wood-brown); margin-top: 20px;" onclick="showRank()">🏆 排行榜紀錄</button>
             <div class="footer-brand" style="margin-top: 20px;">卡 雅 音 樂 教 室</div>
@@ -348,11 +346,20 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const modeConf = config[currentMode];
         const colors = ["#FF0000", "#FFA500", "#FFD700", "#008000", "#800080"];
+        // 修正五線譜起始位置，確保視覺居中
         const staffStartY = currentMode === 'treble' ? canvas.height/2 + 2*s : canvas.height/2 - 2*s;
         
-        for (let i = 0; i < curLv; i++) {
+        // 始終繪製 5 條線
+        for (let i = 0; i < 5; i++) {
             const y = currentMode === 'treble' ? staffStartY - (i * s) : staffStartY + (i * s);
-            ctx.strokeStyle = colors[i];
+            
+            // 參考 image_ca20a6.png: 如果 i 小於當前等級，顯示彩色；否則顯示淺灰色
+            if (i < curLv) {
+                ctx.strokeStyle = colors[i];
+            } else {
+                ctx.strokeStyle = "#E0E0E0"; // 淺灰色
+            }
+            
             ctx.lineWidth = 6;
             ctx.beginPath();
             ctx.moveTo(80, y); ctx.lineTo(920, y);
@@ -361,6 +368,7 @@
 
         ctx.fillStyle = "#111";
         ctx.font = `${s * modeConf.fontSizeMult}px serif`;
+        // 譜號位置微調
         const clefY = currentMode === 'treble' ? staffStartY + modeConf.symbolOffset : staffStartY + 3*s + modeConf.symbolOffset;
         ctx.fillText(modeConf.clef, 90, clefY);
 
@@ -372,6 +380,8 @@
             ctx.beginPath();
             ctx.ellipse(x, y, s * 0.65, s * 0.46, -Math.PI / 8, 0, 2 * Math.PI);
             ctx.fill();
+            
+            // 繪製加線（上加線或下加線）
             if (steps <= -2 || steps >= 10) {
                 ctx.strokeStyle = "#333"; ctx.lineWidth = 6;
                 ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x + s, y); ctx.stroke();
