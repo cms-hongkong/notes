@@ -43,7 +43,6 @@
             flex-direction: column;
         }
 
-        /* 藝術標題樣式 */
         .art-title {
             font-weight: 900;
             display: flex;
@@ -53,13 +52,11 @@
             filter: drop-shadow(2px 2px 0px white);
         }
 
-        /* 遊戲進行中的標題 */
         .in-game-title {
             font-size: clamp(1.2rem, 5vw, 2.2rem);
             margin-bottom: 5px;
         }
 
-        /* 首頁/選單的大標題 */
         .main-menu-title {
             font-size: clamp(2rem, 9vw, 4rem);
             margin-bottom: clamp(15px, 5vw, 30px);
@@ -70,14 +67,13 @@
             text-shadow: 3px 3px 0px var(--wood-brown);
         }
 
-        /* 字體顏色與旋轉 */
-        .art-title span:nth-child(1) { color: #FF6B6B; transform: rotate(-7deg); } /* 卡 */
-        .art-title span:nth-child(2) { color: #FF9F45; transform: rotate(5deg); }  /* 雅 */
-        .art-title span:nth-child(3) { color: #6BCB77; transform: rotate(-4deg); } /* 認 */
-        .art-title span:nth-child(4) { color: #4D96FF; transform: rotate(6deg); }  /* 音 */
-        .art-title span:nth-child(5) { color: #F47174; transform: rotate(-5deg); } /* 大 */
-        .art-title span:nth-child(6) { color: #4ECDC4; transform: rotate(4deg); }  /* 挑 */
-        .art-title span:nth-child(7) { color: #9B59B6; transform: rotate(-6deg); } /* 戰 */
+        .art-title span:nth-child(1) { color: #FF6B6B; transform: rotate(-7deg); }
+        .art-title span:nth-child(2) { color: #FF9F45; transform: rotate(5deg); }
+        .art-title span:nth-child(3) { color: #6BCB77; transform: rotate(-4deg); }
+        .art-title span:nth-child(4) { color: #4D96FF; transform: rotate(6deg); }
+        .art-title span:nth-child(5) { color: #F47174; transform: rotate(-5deg); }
+        .art-title span:nth-child(6) { color: #4ECDC4; transform: rotate(4deg); }
+        .art-title span:nth-child(7) { color: #9B59B6; transform: rotate(-6deg); }
 
         .stats-bar {
             display: flex;
@@ -193,6 +189,17 @@
 
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
         .shake-btn { animation: shake 0.3s; }
+
+        /* 新增底部文字樣式 */
+        .footer-brand {
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            color: var(--wood-brown);
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            font-weight: bold;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -214,8 +221,10 @@
     
     <div id="answer-area"></div>
 
+    <!-- 每一頁底部都會看到的品牌文字 -->
+    <div class="footer-brand">卡 雅 音 樂 教 室</div>
+
     <div id="overlay">
-        <!-- 首頁 -->
         <div id="mode-view" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
             <div class="art-title main-menu-title">
                 <span>卡</span><span>雅</span><span>認</span><span>音</span><span>大</span><span>挑</span><span>戰</span>
@@ -224,22 +233,16 @@
             <button class="btn-forest" style="background: #2D6A4F;" onclick="selectMode('treble')">𝄞 高音譜號模式</button>
             <button class="btn-forest" style="background: #40916C;" onclick="selectMode('bass')">𝄢 低音譜號模式</button>
             <button class="btn-forest" style="background: var(--wood-brown); margin-top: 20px;" onclick="showRank()">🏆 排行榜紀錄</button>
-            
-            <!-- 加入底部文字 -->
-            <div style="margin-top: 30px; font-family: '微軟正黑體', sans-serif; font-weight: bold; color: var(--wood-brown); font-size: clamp(1rem, 3vw, 1.2rem);">卡雅音樂教室</div>
+            <div class="footer-brand" style="margin-top: 20px;">卡 雅 音 樂 教 室</div>
         </div>
 
-        <!-- 難度選擇頁面 -->
         <div id="level-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
             <h2 id="level-title" style="font-size: clamp(1.5rem, 5vw, 2rem); margin-bottom: 15px;">選擇難度等級</h2>
             <div id="level-buttons" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;"></div>
             <button class="btn-forest" style="background: #999; margin-top: 20px;" onclick="goBackToMode()">返回主選單</button>
-            
-            <!-- 加入底部文字 -->
-            <div style="margin-top: 30px; font-family: '微軟正黑體', sans-serif; font-weight: bold; color: var(--wood-brown); font-size: clamp(1rem, 3vw, 1.2rem);">卡雅音樂教室</div>
+            <div class="footer-brand" style="margin-top: 20px;">卡 雅 音 樂 教 室</div>
         </div>
 
-        <!-- 結果頁面 -->
         <div id="result-view" style="display: none; width: 100%; text-align: center;">
             <h2 style="font-size: 2.2rem; color: var(--forest-green);">太棒了！完成挑戰！</h2>
             <p id="result-text" style="font-size: 1.5rem;"></p>
@@ -247,10 +250,10 @@
             <input type="text" id="playerNameInput" placeholder="輸入你的名字..." maxlength="10" style="padding: 12px; border-radius: 25px; border: 2px solid var(--leaf-green); margin-bottom: 15px; width: 80%; font-size: 1.1rem; text-align: center; outline: none;">
             <button class="btn-forest" onclick="submitAndRestart()">再玩一次</button>
             <button class="btn-forest" style="background: var(--leaf-green); color: var(--forest-green);" onclick="submitAndGoHome()">回到首頁</button>
+            <div class="footer-brand" style="margin-top: 20px;">卡 雅 音 樂 教 室</div>
         </div>
 
-        <!-- 排行榜頁面 -->
-        <div id="rank-view" style="display: none; width: 100%; align-items: center;">
+        <div id="rank-view" style="display: none; width: 100%; align-items: center; flex-direction: column;">
             <h2 style="margin: 0;">🏆 高手排行榜</h2>
             <div class="rank-table-container">
                 <table class="rank-table">
@@ -259,6 +262,7 @@
                 </table>
             </div>
             <button class="btn-forest" onclick="goBackToMode()">返回主選單</button>
+            <div class="footer-brand" style="margin-top: 20px;">卡 雅 音 樂 教 室</div>
         </div>
     </div>
 </div>
@@ -473,5 +477,6 @@
 
     window.onload = () => drawScene();
 </script>
+
 </body>
 </html>
